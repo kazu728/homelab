@@ -1,0 +1,54 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: grafana
+  namespace: argo-cd
+spec:
+  project: default
+  source:
+    repoURL: https://grafana.github.io/helm-charts
+    chart: grafana
+    targetRevision: 10.4.1
+    helm:
+      values: |-
+        adminUser: admin
+        adminPassword: changeme
+
+        service:
+          type: NodePort
+          nodePort: 30300
+
+        datasources:
+          datasources.yaml:
+            apiVersion: 1
+            datasources:
+              - name: Prometheus
+                type: prometheus
+                access: proxy
+                url: http://kube-prometheus-stack-prometheus.observability.svc.cluster.local:9090
+                isDefault: true
+              - name: Loki
+                type: loki
+                access: proxy
+                url: http://loki.observability.svc.cluster.local:3100
+
+        persistence:
+          enabled: true
+          size: 2Gi
+          storageClassName: local-path
+
+        resources:
+          requests:
+            cpu: 50m
+            memory: 150Mi
+          limits:
+            memory: 300Mi
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: observability
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

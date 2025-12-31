@@ -1,0 +1,73 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kube-prometheus-stack
+  namespace: argo-cd
+spec:
+  project: default
+  source:
+    repoURL: https://prometheus-community.github.io/helm-charts
+    chart: kube-prometheus-stack
+    targetRevision: 80.8.2
+    helm:
+      skipCrds: true
+      values: |-
+        defaultRules:
+          create: false
+
+        alertmanager:
+          enabled: false
+
+        grafana:
+          enabled: false
+
+        kubeEtcd:
+          enabled: false
+        kubeControllerManager:
+          enabled: false
+        kubeScheduler:
+          enabled: false
+        kubeProxy:
+          enabled: false
+
+        nodeExporter:
+          enabled: false
+
+        prometheusOperator:
+          resources:
+            requests:
+              cpu: 100m
+              memory: 150Mi
+
+        prometheus:
+          service:
+            type: ClusterIP
+          prometheusSpec:
+            retention: 7d
+            resources:
+              requests:
+                cpu: 200m
+                memory: 200Mi
+            storageSpec:
+              volumeClaimTemplate:
+                spec:
+                  storageClassName: local-path
+                  accessModes: [ "ReadWriteOnce" ]
+                  resources:
+                    requests:
+                      storage: 10Gi
+        kubeStateMetrics:
+          resources:
+            requests:
+              cpu: 50m
+              memory: 100Mi
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: observability
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
