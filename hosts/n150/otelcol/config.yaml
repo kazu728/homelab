@@ -1,0 +1,32 @@
+extensions:
+  file_storage/journald:
+    directory: /var/lib/otelcol/journald
+
+receivers:
+  journald:
+    directory: /var/log/journal
+    start_at: end
+    storage: file_storage/journald
+
+processors:
+  resource:
+    attributes:
+      - key: service.name
+        value: systemd-journal
+        action: insert
+      - key: host.name
+        value: n150
+        action: upsert
+  batch:
+
+exporters:
+  otlphttp:
+    endpoint: http://127.0.0.1:31000/otlp
+
+service:
+  extensions: [file_storage/journald]
+  pipelines:
+    logs:
+      receivers: [journald]
+      processors: [resource, batch]
+      exporters: [otlphttp]

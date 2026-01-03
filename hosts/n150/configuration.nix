@@ -52,6 +52,10 @@
   IdleAction=ignore
   '';
 
+  services.journald.extraConfig = ''
+  Storage=persistent
+  '';
+
   services.tailscale.enable = true;
   systemd.services.tailscale-serve-grafana = {
     description = "Tailscale HTTPS serve for Grafana and Argo CD";
@@ -82,10 +86,10 @@
     description = "Kazuki Matsuo";
     extraGroups = [ "networkmanager" "wheel" ];
   };
-  users.groups.alloy = {};
-  users.users.alloy = {
+  users.groups.otelcol = {};
+  users.users.otelcol = {
     isSystemUser = true;
-    group = "alloy";
+    group = "otelcol";
     extraGroups = [ "systemd-journal" ];
   };
 
@@ -99,10 +103,12 @@
     kubectl
     kubernetes-helm
     kubeseal
+    k9s
+    cloudflared
   ];
   # Make kubectl point to k3s kubeconfig by default.
   environment.sessionVariables.KUBECONFIG = "/etc/rancher/k3s/k3s.yaml";
-  environment.etc."alloy/config.alloy".source = ./alloy/config.alloy;
+  environment.etc."otelcol/config.yaml".source = ./otelcol/config.yaml;
 
   # Lightweight single-node k3s
   services.k3s = {
@@ -140,19 +146,21 @@
     '';
   };
 
-  systemd.services.alloy = {
-    description = "Grafana Alloy";
+  systemd.services.otelcol = {
+    description = "OpenTelemetry Collector (journald -> Loki)";
     after = [ "network-online.target" ];
     wants = [ "network-online.target" ];
     wantedBy = [ "multi-user.target" ];
+    path = [ pkgs.systemd ];
     serviceConfig = {
-      User = "alloy";
-      Group = "alloy";
+      User = "otelcol";
+      Group = "otelcol";
       SupplementaryGroups = [ "systemd-journal" ];
-      ExecStart = "${pkgs.grafana-alloy}/bin/alloy run /etc/alloy/config.alloy --storage.path=/var/lib/alloy";
+      ExecStart = "${pkgs.opentelemetry-collector-contrib}/bin/otelcol-contrib --config /etc/otelcol/config.yaml";
       Restart = "on-failure";
       RestartSec = "5s";
-      StateDirectory = "alloy";
+      StateDirectory = "otelcol";
+      StateDirectoryMode = "0750";
     };
   };
   # Some programs need SUID wrappers, can be configured further or are
