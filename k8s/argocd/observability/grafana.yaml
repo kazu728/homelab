@@ -32,6 +32,14 @@ spec:
                 access: proxy
                 url: http://loki.observability.svc.cluster.local:3100
 
+        sidecar:
+          dashboards:
+            enabled: true
+            label: grafana_dashboard
+            labelValue: "1"
+            searchNamespace: observability
+            defaultFolderName: Kubernetes
+
         persistence:
           enabled: true
           size: 2Gi
