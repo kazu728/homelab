@@ -32,6 +32,9 @@ spec:
                 access: proxy
                 url: http://loki.observability.svc.cluster.local:3100
 
+        initChownData:
+          enabled: false
+
         sidecar:
           dashboards:
             enabled: true
