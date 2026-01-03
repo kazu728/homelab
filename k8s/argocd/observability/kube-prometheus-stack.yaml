@@ -33,6 +33,9 @@ spec:
         nodeExporter:
           enabled: true
 
+        prometheus-node-exporter:
+          hostNetwork: false
+
         prometheusOperator:
           resources:
             requests:
