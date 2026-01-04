@@ -2431,7 +2431,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "sum(rate(node_network_receive_bytes_total{device!~\"(veth|azv|lxc).*\", job=\"$job\"}[$__rate_interval])) by (device)",
+              "expr": "sum(rate(node_network_receive_bytes_total{device!~\"(veth|azv|lxc).*\", job=~\".*\"}[$__rate_interval])) by (device)",
               "interval": "$resolution",
               "legendFormat": "Received : {{ device }}",
               "range": true,
@@ -2444,7 +2444,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "- sum(rate(node_network_transmit_bytes_total{device!~\"(veth|azv|lxc).*\", job=\"$job\"}[$__rate_interval])) by (device)",
+              "expr": "- sum(rate(node_network_transmit_bytes_total{device!~\"(veth|azv|lxc).*\", job=~\".*\"}[$__rate_interval])) by (device)",
               "interval": "$resolution",
               "legendFormat": "Transmitted : {{ device }}",
               "range": true,
@@ -2543,7 +2543,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "sum(rate(node_network_receive_drop_total{job=\"$job\"}[$__rate_interval]))",
+              "expr": "sum(rate(node_network_receive_drop_total{job=~\".*\"}[$__rate_interval]))",
               "interval": "$resolution",
               "legendFormat": "Packets dropped (receive)",
               "range": true,
@@ -2556,7 +2556,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "- sum(rate(node_network_transmit_drop_total{job=\"$job\"}[$__rate_interval]))",
+              "expr": "- sum(rate(node_network_transmit_drop_total{job=~\".*\"}[$__rate_interval]))",
               "interval": "$resolution",
               "legendFormat": "Packets dropped (transmit)",
               "range": true,
@@ -2768,7 +2768,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "sum(rate(node_network_receive_bytes_total{job=\"$job\"}[$__rate_interval])) by (instance)",
+              "expr": "sum(rate(node_network_receive_bytes_total{job=~\".*\"}[$__rate_interval])) by (instance)",
               "interval": "$resolution",
               "legendFormat": "Received bytes in {{ instance }}",
               "range": true,
@@ -2780,7 +2780,7 @@ data:
                 "uid": "${datasource}"
               },
               "editorMode": "code",
-              "expr": "- sum(rate(node_network_transmit_bytes_total{job=\"$job\"}[$__rate_interval])) by (instance)",
+              "expr": "- sum(rate(node_network_transmit_bytes_total{job=~\".*\"}[$__rate_interval])) by (instance)",
               "hide": false,
               "interval": "$resolution",
               "legendFormat": "Transmitted bytes in {{ instance }}",
@@ -2881,7 +2881,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "sum(rate(node_network_receive_bytes_total{device!~\"(veth|azv|lxc|lo).*\", job=\"$job\"}[$__rate_interval])) by (instance)",
+              "expr": "sum(rate(node_network_receive_bytes_total{device!~\"(veth|azv|lxc|lo).*\", job=~\".*\"}[$__rate_interval])) by (instance)",
               "interval": "$resolution",
               "legendFormat": "Received bytes in {{ instance }}",
               "range": true,
@@ -2893,7 +2893,7 @@ data:
                 "uid": "${datasource}"
               },
               "editorMode": "code",
-              "expr": "- sum(rate(node_network_transmit_bytes_total{device!~\"(veth|azv|lxc|lo).*\", job=\"$job\"}[$__rate_interval])) by (instance)",
+              "expr": "- sum(rate(node_network_transmit_bytes_total{device!~\"(veth|azv|lxc|lo).*\", job=~\".*\"}[$__rate_interval])) by (instance)",
               "hide": false,
               "interval": "$resolution",
               "legendFormat": "Transmitted bytes in {{ instance }}",
@@ -2994,7 +2994,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "sum(rate(node_network_receive_bytes_total{device=\"lo\", job=\"$job\"}[$__rate_interval])) by (instance)",
+              "expr": "sum(rate(node_network_receive_bytes_total{device=\"lo\", job=~\".*\"}[$__rate_interval])) by (instance)",
               "interval": "$resolution",
               "legendFormat": "Received bytes in {{ instance }}",
               "range": true,
@@ -3006,7 +3006,7 @@ data:
                 "uid": "${datasource}"
               },
               "editorMode": "code",
-              "expr": "- sum(rate(node_network_transmit_bytes_total{device=\"lo\", job=\"$job\"}[$__rate_interval])) by (instance)",
+              "expr": "- sum(rate(node_network_transmit_bytes_total{device=\"lo\", job=~\".*\"}[$__rate_interval])) by (instance)",
               "hide": false,
               "interval": "$resolution",
               "legendFormat": "Transmitted bytes in {{ instance }}",
@@ -3045,27 +3045,26 @@ data:
             "type": "datasource"
           },
           {
-            "current": {},
-            "datasource": {
-              "type": "prometheus",
-              "uid": "${datasource}"
+            "current": {
+              "selected": true,
+              "text": "n150",
+              "value": "n150"
             },
-            "definition": "label_values(kube_node_info,cluster)",
-            "hide": 0,
+            "hide": 2,
             "includeAll": false,
             "multi": false,
             "name": "cluster",
-            "options": [],
-            "query": {
-              "qryType": 1,
-              "query": "label_values(kube_node_info,cluster)",
-              "refId": "PrometheusVariableQueryEditor-VariableQuery"
-            },
-            "refresh": 1,
-            "regex": "",
+            "options": [
+              {
+                "selected": true,
+                "text": "n150",
+                "value": "n150"
+              }
+            ],
+            "query": "n150",
+            "queryValue": "",
             "skipUrlSync": false,
-            "sort": 1,
-            "type": "query"
+            "type": "custom"
           },
           {
             "current": {
@@ -3359,7 +3358,7 @@ data:
                 "uid": "${datasource}"
               },
               "exemplar": false,
-              "expr": "avg(sum by (cpu) (rate(node_cpu_seconds_total{mode!~\"idle|iowait|steal\", instance=\"$instance\"}[$__rate_interval])))",
+              "expr": "avg(sum by (cpu) (rate(node_cpu_seconds_total{mode!~\"idle|iowait|steal\", instance=~\"$instance\"}[$__rate_interval])))",
               "instant": true,
               "interval": "$resolution",
               "legendFormat": "",
@@ -3432,7 +3431,7 @@ data:
                 "uid": "${datasource}"
               },
               "exemplar": false,
-              "expr": "sum(node_memory_MemTotal_bytes{instance=\"$instance\"} - node_memory_MemAvailable_bytes{instance=\"$instance\"}) / sum(node_memory_MemTotal_bytes{instance=\"$instance\"})",
+              "expr": "sum(node_memory_MemTotal_bytes{instance=~\"$instance\"} - node_memory_MemAvailable_bytes{instance=~\"$instance\"}) / sum(node_memory_MemTotal_bytes{instance=~\"$instance\"})",
               "instant": true,
               "interval": "$resolution",
               "legendFormat": "",
@@ -3784,7 +3783,7 @@ data:
                 "uid": "${datasource}"
               },
               "exemplar": false,
-              "expr": "sum(rate(node_cpu_seconds_total{mode!~\"idle|iowait|steal\", instance=\"$instance\"}[$__rate_interval]))",
+              "expr": "sum(rate(node_cpu_seconds_total{mode!~\"idle|iowait|steal\", instance=~\"$instance\"}[$__rate_interval]))",
               "instant": true,
               "interval": "$resolution",
               "legendFormat": "",
@@ -3913,7 +3912,7 @@ data:
                 "uid": "${datasource}"
               },
               "exemplar": false,
-              "expr": "sum(node_memory_MemTotal_bytes{instance=\"$instance\"} - node_memory_MemAvailable_bytes{instance=\"$instance\"})",
+              "expr": "sum(node_memory_MemTotal_bytes{instance=~\"$instance\"} - node_memory_MemAvailable_bytes{instance=~\"$instance\"})",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -4051,7 +4050,7 @@ data:
                 "uid": "${datasource}"
               },
               "exemplar": true,
-              "expr": "sum(node_time_seconds{instance=\"$instance\"} - node_boot_time_seconds{instance=\"$instance\"})",
+              "expr": "sum(node_time_seconds{instance=~\"$instance\"} - node_boot_time_seconds{instance=~\"$instance\"})",
               "instant": false,
               "interval": "",
               "legendFormat": "",
@@ -4169,7 +4168,7 @@ data:
                 "uid": "${datasource}"
               },
               "exemplar": true,
-              "expr": "avg(rate(node_cpu_seconds_total{instance=\"$instance\"}[$__rate_interval]) * 100) by (mode)",
+              "expr": "avg(rate(node_cpu_seconds_total{instance=~\"$instance\"}[$__rate_interval]) * 100) by (mode)",
               "hide": false,
               "instant": false,
               "interval": "$resolution",
@@ -4270,7 +4269,7 @@ data:
                 "uid": "${datasource}"
               },
               "exemplar": true,
-              "expr": "node_memory_MemTotal_bytes{instance=\"$instance\"} - node_memory_MemFree_bytes{instance=\"$instance\"} - (node_memory_Cached_bytes{instance=\"$instance\"} + node_memory_Buffers_bytes{instance=\"$instance\"})",
+              "expr": "node_memory_MemTotal_bytes{instance=~\"$instance\"} - node_memory_MemFree_bytes{instance=~\"$instance\"} - (node_memory_Cached_bytes{instance=~\"$instance\"} + node_memory_Buffers_bytes{instance=~\"$instance\"})",
               "instant": false,
               "interval": "$resolution",
               "legendFormat": "RAM Used",
@@ -4282,7 +4281,7 @@ data:
                 "uid": "${datasource}"
               },
               "exemplar": true,
-              "expr": "node_memory_MemTotal_bytes{instance=\"$instance\"}",
+              "expr": "node_memory_MemTotal_bytes{instance=~\"$instance\"}",
               "hide": false,
               "interval": "$resolution",
               "legendFormat": "RAM Total",
@@ -4294,7 +4293,7 @@ data:
                 "uid": "${datasource}"
               },
               "exemplar": true,
-              "expr": "node_memory_Cached_bytes{instance=\"$instance\"}",
+              "expr": "node_memory_Cached_bytes{instance=~\"$instance\"}",
               "hide": false,
               "interval": "$resolution",
               "legendFormat": "RAM Cache",
@@ -4306,7 +4305,7 @@ data:
                 "uid": "${datasource}"
               },
               "exemplar": true,
-              "expr": "node_memory_Buffers_bytes{instance=\"$instance\"}",
+              "expr": "node_memory_Buffers_bytes{instance=~\"$instance\"}",
               "hide": false,
               "interval": "$resolution",
               "legendFormat": "RAM Buffer",
@@ -4318,7 +4317,7 @@ data:
                 "uid": "${datasource}"
               },
               "exemplar": true,
-              "expr": "node_memory_MemFree_bytes{instance=\"$instance\"}",
+              "expr": "node_memory_MemFree_bytes{instance=~\"$instance\"}",
               "hide": false,
               "interval": "$resolution",
               "legendFormat": "RAM Free",
@@ -4330,7 +4329,7 @@ data:
                 "uid": "${datasource}"
               },
               "exemplar": true,
-              "expr": "node_memory_SwapTotal_bytes{instance=\"$instance\"} - node_memory_SwapFree_bytes{instance=\"$instance\"}",
+              "expr": "node_memory_SwapTotal_bytes{instance=~\"$instance\"} - node_memory_SwapFree_bytes{instance=~\"$instance\"}",
               "hide": false,
               "interval": "$resolution",
               "legendFormat": "SWAP Used",
@@ -4342,7 +4341,7 @@ data:
                 "uid": "${datasource}"
               },
               "exemplar": true,
-              "expr": "node_memory_SwapTotal_bytes{instance=\"$instance\"}",
+              "expr": "node_memory_SwapTotal_bytes{instance=~\"$instance\"}",
               "hide": false,
               "interval": "$resolution",
               "legendFormat": "SWAP Total",
@@ -4646,7 +4645,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "sum(rate(node_cpu_core_throttles_total{instance=\"$instance\"}[$__rate_interval]))",
+              "expr": "sum(rate(node_cpu_core_throttles_total{instance=~\"$instance\"}[$__rate_interval]))",
               "interval": "$resolution",
               "legendFormat": "Nb of cpu core throttles",
               "range": true,
@@ -4763,7 +4762,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "node_load1{instance=\"$instance\"}",
+              "expr": "node_load1{instance=~\"$instance\"}",
               "interval": "$resolution",
               "legendFormat": "1m",
               "range": true,
@@ -4776,7 +4775,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "node_load5{instance=\"$instance\"}",
+              "expr": "node_load5{instance=~\"$instance\"}",
               "hide": false,
               "interval": "$resolution",
               "legendFormat": "5m",
@@ -4790,7 +4789,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "node_load15{instance=\"$instance\"}",
+              "expr": "node_load15{instance=~\"$instance\"}",
               "hide": false,
               "interval": "$resolution",
               "legendFormat": "15m",
@@ -4888,7 +4887,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "rate(node_context_switches_total{instance=\"$instance\"}[$__rate_interval])",
+              "expr": "rate(node_context_switches_total{instance=~\"$instance\"}[$__rate_interval])",
               "interval": "$resolution",
               "intervalFactor": 1,
               "legendFormat": "Context switches",
@@ -4902,7 +4901,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "rate(node_intr_total{instance=\"$instance\"}[$__rate_interval])",
+              "expr": "rate(node_intr_total{instance=~\"$instance\"}[$__rate_interval])",
               "hide": false,
               "interval": "$resolution",
               "legendFormat": "Interrupts",
@@ -5003,7 +5002,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "node_filefd_maximum{instance=\"$instance\"}",
+              "expr": "node_filefd_maximum{instance=~\"$instance\"}",
               "instant": false,
               "interval": "$resolution",
               "legendFormat": "Maximum file descriptors",
@@ -5016,7 +5015,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "node_filefd_allocated{instance=\"$instance\"}",
+              "expr": "node_filefd_allocated{instance=~\"$instance\"}",
               "hide": false,
               "instant": false,
               "interval": "$resolution",
@@ -5118,7 +5117,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "node_timex_estimated_error_seconds{instance=\"$instance\"}",
+              "expr": "node_timex_estimated_error_seconds{instance=~\"$instance\"}",
               "instant": false,
               "interval": "$resolution",
               "intervalFactor": 1,
@@ -5132,7 +5131,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "node_timex_maxerror_seconds{instance=\"$instance\"}",
+              "expr": "node_timex_maxerror_seconds{instance=~\"$instance\"}",
               "hide": false,
               "interval": "$resolution",
               "intervalFactor": 1,
@@ -5250,7 +5249,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "sum(rate(node_network_receive_bytes_total{instance=\"$instance\"}[$__rate_interval]))",
+              "expr": "sum(rate(node_network_receive_bytes_total{instance=~\"$instance\"}[$__rate_interval]))",
               "interval": "$resolution",
               "legendFormat": "In",
               "range": true,
@@ -5263,7 +5262,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "- sum(rate(node_network_transmit_bytes_total{instance=\"$instance\"}[$__rate_interval]))",
+              "expr": "- sum(rate(node_network_transmit_bytes_total{instance=~\"$instance\"}[$__rate_interval]))",
               "interval": "$resolution",
               "legendFormat": "Out",
               "range": true,
@@ -5361,7 +5360,7 @@ data:
                 "uid": "${datasource}"
               },
               "exemplar": true,
-              "expr": "sum(rate(node_network_receive_errs_total{instance=\"$instance\"}[$__rate_interval]))",
+              "expr": "sum(rate(node_network_receive_errs_total{instance=~\"$instance\"}[$__rate_interval]))",
               "interval": "$resolution",
               "legendFormat": "In",
               "refId": "A"
@@ -5373,7 +5372,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "- sum(rate(node_network_transmit_errs_total{instance=\"$instance\"}[$__rate_interval]))",
+              "expr": "- sum(rate(node_network_transmit_errs_total{instance=~\"$instance\"}[$__rate_interval]))",
               "interval": "$resolution",
               "legendFormat": "Out",
               "range": true,
@@ -5472,7 +5471,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "sum(rate(node_network_receive_packets_total{instance=\"$instance\"}[$__rate_interval]))",
+              "expr": "sum(rate(node_network_receive_packets_total{instance=~\"$instance\"}[$__rate_interval]))",
               "interval": "$resolution",
               "legendFormat": "In",
               "range": true,
@@ -5485,7 +5484,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "- sum(rate(node_network_transmit_packets_total{instance=\"$instance\"}[$__rate_interval]))",
+              "expr": "- sum(rate(node_network_transmit_packets_total{instance=~\"$instance\"}[$__rate_interval]))",
               "interval": "$resolution",
               "legendFormat": "Out",
               "range": true,
@@ -5583,7 +5582,7 @@ data:
                 "uid": "${datasource}"
               },
               "exemplar": true,
-              "expr": "sum(rate(node_network_receive_drop_total{instance=\"$instance\"}[$__rate_interval]))",
+              "expr": "sum(rate(node_network_receive_drop_total{instance=~\"$instance\"}[$__rate_interval]))",
               "hide": false,
               "interval": "$resolution",
               "legendFormat": "In",
@@ -5595,7 +5594,7 @@ data:
                 "uid": "${datasource}"
               },
               "exemplar": true,
-              "expr": "- sum(rate(node_network_transmit_drop_total{instance=\"$instance\"}[$__rate_interval]))",
+              "expr": "- sum(rate(node_network_transmit_drop_total{instance=~\"$instance\"}[$__rate_interval]))",
               "hide": false,
               "interval": "$resolution",
               "legendFormat": "Out",
@@ -5694,7 +5693,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "node_netstat_Tcp_CurrEstab{instance=\"$instance\"}",
+              "expr": "node_netstat_Tcp_CurrEstab{instance=~\"$instance\"}",
               "instant": false,
               "interval": "$resolution",
               "legendFormat": "TCP Currently Established",
@@ -5809,7 +5808,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "node_nf_conntrack_entries{instance=\"$instance\"}",
+              "expr": "node_nf_conntrack_entries{instance=~\"$instance\"}",
               "instant": false,
               "interval": "$resolution",
               "legendFormat": "NF Conntrack entries",
@@ -5822,7 +5821,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "node_nf_conntrack_entries_limit{instance=\"$instance\"}",
+              "expr": "node_nf_conntrack_entries_limit{instance=~\"$instance\"}",
               "hide": false,
               "interval": "$resolution",
               "legendFormat": "NF Conntrack limit",
@@ -6319,7 +6318,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "100 - ((node_filesystem_avail_bytes{instance=\"$instance\"} * 100) / node_filesystem_size_bytes{instance=\"$instance\"})",
+              "expr": "100 - ((node_filesystem_avail_bytes{instance=~\"$instance\"} * 100) / node_filesystem_size_bytes{instance=~\"$instance\"})",
               "hide": false,
               "interval": "$resolution",
               "legendFormat": "{{ mountpoint }}",
@@ -6420,7 +6419,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "100 - (node_filesystem_files_free{instance=\"$instance\"} / node_filesystem_files{instance=\"$instance\"} * 100)",
+              "expr": "100 - (node_filesystem_files_free{instance=~\"$instance\"} / node_filesystem_files{instance=~\"$instance\"} * 100)",
               "hide": false,
               "interval": "$resolution",
               "legendFormat": "{{ mountpoint }}",
@@ -6521,7 +6520,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "rate(node_disk_read_bytes_total{instance=\"$instance\"}[$__rate_interval])",
+              "expr": "rate(node_disk_read_bytes_total{instance=~\"$instance\"}[$__rate_interval])",
               "interval": "$resolution",
               "legendFormat": "{{device}}",
               "range": true,
@@ -6621,7 +6620,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "rate(node_disk_written_bytes_total{instance=\"$instance\"}[$__rate_interval])",
+              "expr": "rate(node_disk_written_bytes_total{instance=~\"$instance\"}[$__rate_interval])",
               "hide": false,
               "interval": "$resolution",
               "legendFormat": "{{device}}",
@@ -6722,7 +6721,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "rate(node_disk_reads_completed_total{instance=\"$instance\"}[$__rate_interval])",
+              "expr": "rate(node_disk_reads_completed_total{instance=~\"$instance\"}[$__rate_interval])",
               "interval": "$resolution",
               "legendFormat": "{{device}}",
               "range": true,
@@ -6822,7 +6821,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "rate(node_disk_writes_completed_total{instance=\"$instance\"}[$__rate_interval])",
+              "expr": "rate(node_disk_writes_completed_total{instance=~\"$instance\"}[$__rate_interval])",
               "hide": false,
               "interval": "$resolution",
               "legendFormat": "{{device}}",
@@ -6923,7 +6922,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "rate(node_disk_io_now{instance=\"$instance\"}[$__rate_interval]) ",
+              "expr": "rate(node_disk_io_now{instance=~\"$instance\"}[$__rate_interval]) ",
               "interval": "$resolution",
               "legendFormat": "{{device}}",
               "range": true,
@@ -7023,7 +7022,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": true,
-              "expr": "sum(node_filesystem_device_error{instance=\"$instance\"}) by (mountpoint)",
+              "expr": "sum(node_filesystem_device_error{instance=~\"$instance\"}) by (mountpoint)",
               "interval": "$resolution",
               "legendFormat": "{{ mountpoint }}",
               "range": true,
@@ -7057,27 +7056,26 @@ data:
             "type": "datasource"
           },
           {
-            "current": {},
-            "datasource": {
-              "type": "prometheus",
-              "uid": "${datasource}"
+            "current": {
+              "selected": true,
+              "text": "n150",
+              "value": "n150"
             },
-            "definition": "label_values(kube_node_info,cluster)",
-            "hide": 0,
+            "hide": 2,
             "includeAll": false,
             "multi": false,
             "name": "cluster",
-            "options": [],
-            "query": {
-              "qryType": 1,
-              "query": "label_values(kube_node_info,cluster)",
-              "refId": "PrometheusVariableQueryEditor-VariableQuery"
-            },
-            "refresh": 1,
-            "regex": "",
+            "options": [
+              {
+                "selected": true,
+                "text": "n150",
+                "value": "n150"
+              }
+            ],
+            "query": "n150",
+            "queryValue": "",
             "skipUrlSync": false,
-            "sort": 1,
-            "type": "query"
+            "type": "custom"
           },
           {
             "current": {
@@ -7149,19 +7147,24 @@ data:
             "type": "query"
           },
           {
-            "current": {},
+            "allValue": ".*",
+            "current": {
+              "selected": true,
+              "text": "All",
+              "value": "$__all"
+            },
             "datasource": {
               "type": "prometheus",
               "uid": "${datasource}"
             },
-            "definition": "label_values(node_uname_info{nodename=~\"(?i:($node)(\\\\.[a-z0-9.-]+)?)\"}, instance)",
+            "definition": "label_values(node_uname_info, instance)",
             "hide": 2,
-            "includeAll": false,
+            "includeAll": true,
             "multi": false,
             "name": "instance",
             "options": [],
             "query": {
-              "query": "label_values(node_uname_info{nodename=~\"(?i:($node)(\\\\.[a-z0-9.-]+)?)\"}, instance)",
+              "query": "label_values(node_uname_info, instance)",
               "refId": "StandardVariableQuery"
             },
             "refresh": 2,
@@ -7169,7 +7172,7 @@ data:
             "skipUrlSync": false,
             "sort": 1,
             "type": "query"
-          }
+          },
         ]
       },
       "time": {
@@ -10264,31 +10267,25 @@ data:
           },
           {
             "current": {
-              "isNone": true,
-              "selected": false,
-              "text": "None",
-              "value": ""
+              "selected": true,
+              "text": "n150",
+              "value": "n150"
             },
-            "datasource": {
-              "type": "prometheus",
-              "uid": "${datasource}"
-            },
-            "definition": "label_values(kube_node_info,cluster)",
-            "hide": 0,
+            "hide": 2,
             "includeAll": false,
             "multi": false,
             "name": "cluster",
-            "options": [],
-            "query": {
-              "qryType": 1,
-              "query": "label_values(kube_node_info,cluster)",
-              "refId": "PrometheusVariableQueryEditor-VariableQuery"
-            },
-            "refresh": 1,
-            "regex": "",
+            "options": [
+              {
+                "selected": true,
+                "text": "n150",
+                "value": "n150"
+              }
+            ],
+            "query": "n150",
+            "queryValue": "",
             "skipUrlSync": false,
-            "sort": 1,
-            "type": "query"
+            "type": "custom"
           },
           {
             "allValue": ".*",
