@@ -7147,32 +7147,27 @@ data:
             "type": "query"
           },
           {
-            "allValue": ".*",
             "current": {
               "selected": true,
               "text": "All",
-              "value": "$__all"
+              "value": ".*"
             },
-            "datasource": {
-              "type": "prometheus",
-              "uid": "${datasource}"
-            },
-            "definition": "label_values(node_cpu_seconds_total, instance)",
             "hide": 2,
-            "includeAll": true,
+            "includeAll": false,
             "multi": false,
             "name": "instance",
-            "options": [],
-            "query": {
-              "query": "label_values(node_cpu_seconds_total, instance)",
-              "refId": "StandardVariableQuery"
-            },
-            "refresh": 2,
-            "regex": "",
-            "skipUrlSync": false,
-            "sort": 1,
-            "type": "query"
-          },
+            "options": [
+              {
+                "selected": true,
+                "text": "All",
+                "value": ".*"
+              }
+            ],
+            "query": ".*",
+            "queryValue": "",
+            "skipUrlSync": true,
+            "type": "custom"
+          }
         ]
       },
       "time": {
