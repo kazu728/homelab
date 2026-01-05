@@ -7157,14 +7157,14 @@ data:
               "type": "prometheus",
               "uid": "${datasource}"
             },
-            "definition": "label_values(node_uname_info, instance)",
+            "definition": "label_values(node_cpu_seconds_total, instance)",
             "hide": 2,
             "includeAll": true,
             "multi": false,
             "name": "instance",
             "options": [],
             "query": {
-              "query": "label_values(node_uname_info, instance)",
+              "query": "label_values(node_cpu_seconds_total, instance)",
               "refId": "StandardVariableQuery"
             },
             "refresh": 2,
