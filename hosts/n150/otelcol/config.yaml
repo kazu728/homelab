@@ -1,6 +1,7 @@
 extensions:
   file_storage/journald:
     directory: /var/lib/otelcol/journald
+    create_directory: true
 
 receivers:
   journald:
