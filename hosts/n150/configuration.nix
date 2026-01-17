@@ -28,7 +28,7 @@
   networking.networkmanager.wifi.powersave = false;
 
   # Disabled by default; enable when you're ready to apply.
-  services.networkRecover.enable = false;
+  services.networkRecover.enable = true;
 
   hardware.graphics.enable = false;
 
