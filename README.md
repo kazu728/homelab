@@ -1,0 +1,3 @@
+# homelab
+
+My homelab configuration.
