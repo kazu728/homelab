@@ -2,7 +2,7 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, ... }:
+{ pkgs, ... }:
 
 {
   imports =
@@ -38,7 +38,7 @@
   # Firewall: expose k3s API only via tailscale; trust pod networks.
   networking.firewall = {
     enable = true;
-    interfaces.tailscale0.allowedTCPPorts = [ 22 443 8443 6443 32443 30300 31000 ];
+    interfaces.tailscale0.allowedTCPPorts = [ 22 443 8443 6443 32443 30300 31000 11434 ];
     trustedInterfaces = [ "cni0" "flannel.1" ];
   };
 
@@ -83,7 +83,27 @@
     settings.KbdInteractiveAuthentication = false;
     settings.PubkeyAuthentication = true;
   };
-  
+
+  # Local LLM on host via Ollama (reachable only through tailscale firewall rules).
+  services.ollama = {
+    enable = true;
+    acceleration = false; # CPU-first for lower power usage.
+    host = "0.0.0.0";
+    port = 11434;
+    openFirewall = false; # Keep control at interface-specific firewall rules.
+    loadModels = [ "qwen2.5:14b" ];
+    environmentVariables = {
+      OLLAMA_NUM_PARALLEL = "1";
+      OLLAMA_MAX_LOADED_MODELS = "1";
+      OLLAMA_KEEP_ALIVE = "0s";
+      OLLAMA_CONTEXT_LENGTH = "16384";
+    };
+  };
+  systemd.services.ollama.serviceConfig = {
+    CPUQuota = "200%";
+    MemoryMax = "10G";
+  };
+
 
   # Define a user account. Don't forget to set a password with 'passwd'.
   users.users.kazuki = {
