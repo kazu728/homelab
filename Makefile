@@ -1,9 +1,10 @@
-.PHONY: build build-n150 seal-argocd-repo llm-smoke llm-chat llm-chat-reset llm-chat-show
+.PHONY: build seal-argocd-repo llm-smoke llm-chat llm-chat-reset llm-chat-show access-list
 N150_HOST ?= n150
 N150_STAGE_DIR ?= /tmp/nixos-sync
 ARGOCD_REPO_KEY ?= ~/.ssh/argocd_homelab
 LLM_CHAT_MODEL ?= qwen2.5:14b
 LLM_CHAT_STATE ?= /tmp/homelab-llm-chat.json
+HOMELAB_HOST ?=
 
 build:
 	ssh $(N150_HOST) "rm -rf $(N150_STAGE_DIR) && mkdir -p $(N150_STAGE_DIR)"
@@ -47,3 +48,10 @@ llm-chat-reset:
 llm-chat-show:
 	@LLM_CHAT_STATE="$(LLM_CHAT_STATE)" \
 	./scripts/llm-chat.sh show
+
+access-list:
+	@host="$${HOMELAB_HOST:-$$(ssh $(N150_HOST) 'tailscale status --json' | python3 -c 'import json,sys; print(json.load(sys.stdin)["Self"]["DNSName"].rstrip("."))')}"; \
+	grafana_user="$$(ssh $(N150_HOST) "sudo KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubectl -n observability get secret grafana -o jsonpath='{.data.admin-user}' | base64 --decode")"; \
+	grafana_pass="$$(ssh $(N150_HOST) "sudo KUBECONFIG=/etc/rancher/k3s/k3s.yaml kubectl -n observability get secret grafana -o jsonpath='{.data.admin-password}' | base64 --decode")"; \
+	argo_pass="$$(ssh $(N150_HOST) "sudo KUBECONFIG=/etc/rancher/k3s/k3s.yaml sh -lc \"kubectl -n argo-cd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' 2>/dev/null || kubectl -n argo-cd get secret argo-cd-initial-admin-secret -o jsonpath='{.data.password}' 2>/dev/null\" | base64 --decode")"; \
+	printf 'Homelab access endpoints:\n  Grafana: https://%s/\n  Argo CD: https://%s:8443/\n\nCredentials:\n  Grafana:\n    user: %s\n    pass: %s\n  Argo CD:\n    user: admin\n    pass: %s\n' "$$host" "$$host" "$$grafana_user" "$$grafana_pass" "$$argo_pass"
