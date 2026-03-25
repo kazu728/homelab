@@ -12,7 +12,6 @@ spec:
     helm:
       values: |-
         adminUser: admin
-        adminPassword: changeme
 
         service:
           type: NodePort
