@@ -1,0 +1,34 @@
+name: zizmor
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/**
+      - .github/actions/**
+      - .github/dependabot.yml
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/**
+      - .github/actions/**
+      - .github/dependabot.yml
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  zizmor:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          persist-credentials: false
+      - uses: zizmorcore/zizmor-action@b1d7e1fb5de872772f31590499237e7cce841e8e
+        with:
+          advanced-security: true
+          annotations: true
+          fail-on-no-inputs: false
