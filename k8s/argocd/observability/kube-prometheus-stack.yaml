@@ -48,7 +48,8 @@ spec:
           service:
             type: ClusterIP
           prometheusSpec:
-            retention: 7d
+            retention: 30d
+            serviceMonitorSelectorNilUsesHelmValues: false
             externalLabels:
               cluster: n150
             resources:
