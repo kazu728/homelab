@@ -1,0 +1,86 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: nats
+  namespace: argo-cd
+spec:
+  project: default
+  source:
+    repoURL: https://nats-io.github.io/k8s/helm/charts/
+    chart: nats
+    targetRevision: 2.12.6
+    helm:
+      values: |-
+        config:
+          cluster:
+            enabled: false
+          jetstream:
+            enabled: true
+            fileStore:
+              enabled: true
+              pvc:
+                enabled: true
+                size: 2Gi
+                storageClassName: local-path
+            memoryStore:
+              enabled: false
+          leafnodes:
+            enabled: false
+          websocket:
+            enabled: false
+          mqtt:
+            enabled: false
+          monitor:
+            enabled: true
+          merge:
+            authorization:
+              token: << $NATS_TOKEN >>
+
+        container:
+          env:
+            NATS_TOKEN:
+              valueFrom:
+                secretKeyRef:
+                  name: nats-auth
+                  key: token
+          resources:
+            requests:
+              cpu: 50m
+              memory: 96Mi
+            limits:
+              memory: 192Mi
+
+        service:
+          enabled: true
+          ports:
+            nats:
+              enabled: true
+            leafnodes:
+              enabled: false
+            websocket:
+              enabled: false
+            mqtt:
+              enabled: false
+            cluster:
+              enabled: false
+            gateway:
+              enabled: false
+            monitor:
+              enabled: false
+            profiling:
+              enabled: false
+
+        natsBox:
+          enabled: false
+
+        podDisruptionBudget:
+          enabled: false
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: nats
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
