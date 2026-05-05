@@ -4,7 +4,7 @@ metadata:
   name: platform-apps
   namespace: argo-cd
 spec:
-  project: default
+  project: platform
   source:
     repoURL: https://github.com/kazu728/homelab.git
     targetRevision: HEAD

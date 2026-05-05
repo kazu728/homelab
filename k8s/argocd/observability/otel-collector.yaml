@@ -4,7 +4,7 @@ metadata:
   name: otel-collector
   namespace: argo-cd
 spec:
-  project: default
+  project: observability
   source:
     repoURL: https://open-telemetry.github.io/opentelemetry-helm-charts
     chart: opentelemetry-collector
