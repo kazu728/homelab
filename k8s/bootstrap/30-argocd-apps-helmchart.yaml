@@ -49,7 +49,7 @@ spec:
         source:
           repoURL: https://github.com/kazu728/homelab.git
           targetRevision: HEAD
-          path: k8s/argocd/apps
+          path: k8s/argocd
         destination:
           server: https://kubernetes.default.svc
           namespace: argo-cd
