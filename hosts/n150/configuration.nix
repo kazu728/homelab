@@ -38,7 +38,7 @@
   # Firewall: expose k3s API only via tailscale; trust pod networks.
   networking.firewall = {
     enable = true;
-    interfaces.tailscale0.allowedTCPPorts = [ 22 443 8443 6443 32443 30300 31000 ];
+    interfaces.tailscale0.allowedTCPPorts = [ 22 443 8443 6443 32443 30300 31000 31080 ];
     trustedInterfaces = [ "cni0" "flannel.1" ];
   };
 

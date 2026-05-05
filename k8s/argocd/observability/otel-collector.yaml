@@ -24,9 +24,18 @@ spec:
             enabled: true
 
         alternateConfig:
+          receivers:
+            otlp:
+              protocols:
+                http:
+                  endpoint: ${env:MY_POD_IP}:4318
           exporters:
-            otlphttp:
+            otlphttp/loki:
               endpoint: http://loki.observability.svc.cluster.local:3100/otlp
+            prometheus:
+              endpoint: ${env:MY_POD_IP}:8889
+              resource_to_telemetry_conversion:
+                enabled: true
           processors:
             memory_limiter:
               check_interval: 5s
@@ -46,13 +55,30 @@ spec:
                   - memory_limiter
                   - batch
                 exporters:
-                  - otlphttp
+                  - otlphttp/loki
+              metrics:
+                receivers:
+                  - otlp
+                processors:
+                  - memory_limiter
+                  - batch
+                exporters:
+                  - prometheus
 
         ports:
           otlp:
             enabled: false
           otlp-http:
-            enabled: false
+            enabled: true
+            containerPort: 4318
+            servicePort: 4318
+            hostPort: null
+            protocol: TCP
+          prometheus:
+            enabled: true
+            containerPort: 8889
+            servicePort: 8889
+            protocol: TCP
           jaeger-compact:
             enabled: false
           jaeger-thrift:
@@ -61,6 +87,14 @@ spec:
             enabled: false
           zipkin:
             enabled: false
+
+        serviceMonitor:
+          enabled: true
+          metricsEndpoints:
+            - port: prometheus
+
+        service:
+          enabled: true
 
         resources:
           requests:

@@ -25,3 +25,11 @@ spec:
             selfHeal: true
           syncOptions:
             - CreateNamespace=true
+            - RespectIgnoreDifferences=true
+        ignoreDifferences:
+          - group: argoproj.io
+            kind: Application
+            name: manifest
+            namespace: argo-cd
+            jsonPointers:
+              - /spec/source/kustomize

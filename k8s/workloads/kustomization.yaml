@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - android-usage-receiver.yaml
+  - deployment.yaml
+  - nats-client-auth-sealedsecret.yaml
+  - service.yaml
+images:
+  - name: ghcr.io/kazu728/android-usage-receiver
+    newTag: latest
