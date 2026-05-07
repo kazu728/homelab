@@ -10,7 +10,7 @@ spec:
     chart: nats
     targetRevision: 2.12.6
     helm:
-      values: |-
+      valuesObject:
         config:
           cluster:
             enabled: false
@@ -34,7 +34,7 @@ spec:
             enabled: true
           merge:
             authorization:
-              token: << $NATS_TOKEN >>
+              token: "<< $NATS_TOKEN >>"
 
         container:
           env:

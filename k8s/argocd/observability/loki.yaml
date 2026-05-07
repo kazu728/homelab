@@ -10,7 +10,7 @@ spec:
     chart: loki
     targetRevision: 6.49.0
     helm:
-      values: |-
+      valuesObject:
         deploymentMode: SingleBinary
 
         loki:

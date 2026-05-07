@@ -10,10 +10,10 @@ spec:
     chart: argocd-image-updater
     targetRevision: 1.1.5
     helm:
-      values: |-
+      valuesObject:
         config:
-          argocd.namespace: argo-cd
-          log.level: info
+          "argocd.namespace": argo-cd
+          "log.level": info
 
         extraObjects:
           - apiVersion: argocd-image-updater.argoproj.io/v1alpha1

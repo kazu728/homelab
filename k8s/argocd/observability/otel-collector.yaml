@@ -10,7 +10,7 @@ spec:
     chart: opentelemetry-collector
     targetRevision: 0.142.1
     helm:
-      values: |-
+      valuesObject:
         mode: daemonset
 
         image:
