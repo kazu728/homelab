@@ -26,31 +26,6 @@
             ];
         };
 
-      androidUsageReceiverPackage =
-        pkgs:
-        let
-          inherit (pkgs) buildGo125Module;
-        in
-        buildGo125Module {
-          pname = "android-usage-receiver";
-          version = "0.0.0";
-
-          src = ./apps/android-usage-receiver;
-          subPackages = [ "cmd/android-usage-receiver" ];
-
-          vendorHash = "sha256-bZOejICNfZiG1Tfq674M8hH1tVKGN5Ot3CKPUqP3wuo=";
-
-          ldflags = [
-            "-s"
-            "-w"
-          ];
-
-          checkPhase = ''
-            runHook preCheck
-            go test ./...
-            runHook postCheck
-          '';
-        };
     in
     {
       devShells = forAllSystems (
@@ -82,14 +57,5 @@
         }
       );
 
-      checks = forAllSystems (
-        system:
-        let
-          pkgs = pkgsFor system;
-        in
-        {
-          android-usage-receiver = androidUsageReceiverPackage pkgs;
-        }
-      );
     };
 }
