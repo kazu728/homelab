@@ -24,7 +24,7 @@ spec:
               rules_directory: /var/loki/rules
           schemaConfig:
             configs:
-              - from: 2024-04-01
+              - from: "2024-04-01"
                 store: tsdb
                 object_store: filesystem
                 schema: v13
@@ -51,6 +51,17 @@ spec:
               memory: 256Mi
             limits:
               memory: 512Mi
+
+        chunksCache:
+          enabled: false
+        resultsCache:
+          enabled: false
+
+        monitoring:
+          serviceMonitor:
+            enabled: true
+          rules:
+            enabled: true
 
         extraObjects:
           - apiVersion: v1

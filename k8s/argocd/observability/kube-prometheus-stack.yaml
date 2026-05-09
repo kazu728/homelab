@@ -17,6 +17,39 @@ spec:
         defaultRules:
           create: false
 
+        additionalPrometheusRulesMap:
+          homelab-observability:
+            groups:
+              - name: homelab-observability
+                rules:
+                  - alert: LokiContainerNotReady
+                    expr: kube_pod_container_status_ready{namespace="observability", pod="loki-0", container="loki"} == 0
+                    for: 5m
+                    labels:
+                      severity: critical
+                      component: loki
+                    annotations:
+                      summary: Loki container is not ready
+                      description: The loki container in observability/loki-0 has been unready for at least 5 minutes.
+                  - alert: LokiContainerRestarting
+                    expr: increase(kube_pod_container_status_restarts_total{namespace="observability", pod="loki-0", container="loki"}[15m]) > 0
+                    for: 5m
+                    labels:
+                      severity: warning
+                      component: loki
+                    annotations:
+                      summary: Loki container is restarting
+                      description: The loki container in observability/loki-0 restarted during the last 15 minutes.
+                  - alert: AndroidUsageMetricsMissing
+                    expr: absent(android_usage_daily_screen_time_seconds)
+                    for: 30m
+                    labels:
+                      severity: warning
+                      component: android-usage
+                    annotations:
+                      summary: Android usage metrics are missing
+                      description: Prometheus has not scraped android_usage_daily_screen_time_seconds for at least 30 minutes.
+
         alertmanager:
           enabled: false
 
@@ -49,9 +82,16 @@ spec:
             type: ClusterIP
           prometheusSpec:
             retention: 30d
+            ruleSelectorNilUsesHelmValues: false
             serviceMonitorSelectorNilUsesHelmValues: false
             externalLabels:
               cluster: n150
+            additionalScrapeConfigs:
+              - job_name: android-usage-receiver
+                metrics_path: /metrics
+                static_configs:
+                  - targets:
+                      - android-usage-receiver.default.svc.cluster.local:8080
             resources:
               requests:
                 cpu: 200m
