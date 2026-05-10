@@ -88,8 +88,9 @@
   users.users.kazuki = {
     isNormalUser = true;
     description = "Kazuki Matsuo";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "k3s-admin" "networkmanager" "wheel" ];
   };
+  users.groups.k3s-admin = {};
   users.groups.otelcol = {};
   users.users.otelcol = {
     isSystemUser = true;
@@ -119,7 +120,7 @@
     enable = true;
     role = "server";
     clusterInit = true;
-    extraFlags = "--write-kubeconfig-mode=644 --disable traefik --disable servicelb --kubelet-arg=max-pods=50 --resolv-conf=/etc/resolv.conf";
+    extraFlags = "--write-kubeconfig-mode=640 --write-kubeconfig-group=k3s-admin --disable traefik --disable servicelb --kubelet-arg=max-pods=50 --resolv-conf=/etc/resolv.conf";
   };
 
   systemd.services.k3s-manifests = {
