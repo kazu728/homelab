@@ -49,9 +49,25 @@ spec:
                     annotations:
                       summary: Android usage metrics are missing
                       description: Prometheus has not scraped android_usage_daily_screen_time_seconds for at least 30 minutes.
+                  - alert: AndroidUsageTargetDown
+                    expr: absent(up{job="android-usage-receiver"}) or up{job="android-usage-receiver"} == 0
+                    for: 10m
+                    labels:
+                      severity: warning
+                      component: android-usage
+                    annotations:
+                      summary: Android usage receiver scrape target is down
+                      description: Prometheus cannot scrape android-usage-receiver.default.svc.cluster.local:8080.
 
         alertmanager:
-          enabled: false
+          enabled: true
+          alertmanagerSpec:
+            resources:
+              requests:
+                cpu: 20m
+                memory: 64Mi
+              limits:
+                memory: 128Mi
 
         grafana:
           enabled: false
@@ -82,7 +98,7 @@ spec:
             type: ClusterIP
           prometheusSpec:
             retention: 30d
-            ruleSelectorNilUsesHelmValues: false
+            ruleSelectorNilUsesHelmValues: true
             serviceMonitorSelectorNilUsesHelmValues: false
             externalLabels:
               cluster: n150

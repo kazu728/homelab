@@ -57,33 +57,20 @@ spec:
         resultsCache:
           enabled: false
 
+        gateway:
+          enabled: true
+
+        sidecar:
+          rules:
+            enabled: false
+
         monitoring:
           serviceMonitor:
             enabled: true
           rules:
             enabled: true
-
-        extraObjects:
-          - apiVersion: v1
-            kind: Service
-            metadata:
-              name: loki-nodeport
-              labels:
-                app.kubernetes.io/name: loki
-                app.kubernetes.io/instance: loki
-                app.kubernetes.io/component: single-binary
-            spec:
-              type: NodePort
-              ports:
-                - name: http
-                  port: 3100
-                  targetPort: http-metrics
-                  protocol: TCP
-                  nodePort: 31000
-              selector:
-                app.kubernetes.io/name: loki
-                app.kubernetes.io/instance: loki
-                app.kubernetes.io/component: single-binary
+            labels:
+              release: kube-prometheus-stack
 
         read:
           replicas: 0

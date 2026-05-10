@@ -29,7 +29,7 @@ spec:
               - name: Loki
                 type: loki
                 access: proxy
-                url: http://loki.observability.svc.cluster.local:3100
+                url: http://loki-gateway.observability.svc.cluster.local
 
         initChownData:
           enabled: false
@@ -41,6 +41,9 @@ spec:
             labelValue: "1"
             searchNamespace: observability
             defaultFolderName: Kubernetes
+            provider:
+              folder: Kubernetes
+              folderUid: kubernetes
 
         persistence:
           enabled: true
