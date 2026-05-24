@@ -7,7 +7,7 @@ spec:
   project: observability
   source:
     repoURL: https://github.com/kazu728/homelab.git
-    targetRevision: HEAD
+    targetRevision: main
     path: k8s/observability-dashboards
   destination:
     server: https://kubernetes.default.svc
