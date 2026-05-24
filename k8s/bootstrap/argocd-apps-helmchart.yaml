@@ -1,0 +1,71 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: argocd-apps
+  namespace: kube-system
+spec:
+  chart: argocd-apps
+  repo: https://argoproj.github.io/argo-helm
+  version: 2.0.5
+  targetNamespace: argo-cd
+  createNamespace: true
+  failurePolicy: reinstall
+  backOffLimit: 1000
+  valuesContent: |-
+    projects:
+      bootstrap:
+        namespace: argo-cd
+        description: Bootstrap app-of-apps
+        sourceRepos:
+          - https://github.com/kazu728/homelab.git
+        destinations:
+          - namespace: argo-cd
+            server: https://kubernetes.default.svc
+        namespaceResourceWhitelist:
+          - group: argoproj.io
+            kind: Application
+      observability:
+        namespace: argo-cd
+        description: Metrics / logs / dashboards
+        sourceRepos:
+          - https://github.com/kazu728/homelab.git
+          - https://grafana.github.io/helm-charts
+          - https://open-telemetry.github.io/opentelemetry-helm-charts
+          - https://prometheus-community.github.io/helm-charts
+        destinations:
+          - namespace: observability
+            server: https://kubernetes.default.svc
+          - namespace: kube-system
+            server: https://kubernetes.default.svc
+        clusterResourceWhitelist:
+          - group: ""
+            kind: Namespace
+          - group: admissionregistration.k8s.io
+            kind: MutatingWebhookConfiguration
+          - group: admissionregistration.k8s.io
+            kind: ValidatingWebhookConfiguration
+          - group: apiextensions.k8s.io
+            kind: CustomResourceDefinition
+          - group: apiregistration.k8s.io
+            kind: APIService
+          - group: rbac.authorization.k8s.io
+            kind: ClusterRole
+          - group: rbac.authorization.k8s.io
+            kind: ClusterRoleBinding
+    applications:
+      apps:
+        namespace: argo-cd
+        project: bootstrap
+        source:
+          repoURL: https://github.com/kazu728/homelab.git
+          targetRevision: main
+          path: k8s/argocd
+        destination:
+          server: https://kubernetes.default.svc
+          namespace: argo-cd
+        syncPolicy:
+          automated:
+            prune: true
+            selfHeal: true
+          syncOptions:
+            - CreateNamespace=true
