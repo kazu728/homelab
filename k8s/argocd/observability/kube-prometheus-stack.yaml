@@ -40,24 +40,6 @@ spec:
                     annotations:
                       summary: Loki container is restarting
                       description: The loki container in observability/loki-0 restarted during the last 15 minutes.
-                  - alert: AndroidUsageMetricsMissing
-                    expr: absent(android_usage_daily_screen_time_seconds)
-                    for: 30m
-                    labels:
-                      severity: warning
-                      component: android-usage
-                    annotations:
-                      summary: Android usage metrics are missing
-                      description: Prometheus has not scraped android_usage_daily_screen_time_seconds for at least 30 minutes.
-                  - alert: AndroidUsageTargetDown
-                    expr: absent(up{job="android-usage-receiver"}) or up{job="android-usage-receiver"} == 0
-                    for: 10m
-                    labels:
-                      severity: warning
-                      component: android-usage
-                    annotations:
-                      summary: Android usage receiver scrape target is down
-                      description: Prometheus cannot scrape android-usage-receiver.default.svc.cluster.local:8080.
 
         alertmanager:
           enabled: true
@@ -102,12 +84,6 @@ spec:
             serviceMonitorSelectorNilUsesHelmValues: false
             externalLabels:
               cluster: n150
-            additionalScrapeConfigs:
-              - job_name: android-usage-receiver
-                metrics_path: /metrics
-                static_configs:
-                  - targets:
-                      - android-usage-receiver.default.svc.cluster.local:8080
             resources:
               requests:
                 cpu: 200m
