@@ -22,7 +22,7 @@ processors:
 
 exporters:
   otlphttp:
-    endpoint: http://127.0.0.1:31000/otlp
+    endpoint: http://127.0.0.1:31318
 
 service:
   extensions: [file_storage/journald]

@@ -50,7 +50,8 @@ spec:
               - health_check
             pipelines:
               logs:
-                receivers: []
+                receivers:
+                  - otlp
                 processors:
                   - memory_limiter
                   - batch
