@@ -5,8 +5,8 @@ HOMELAB_HOST ?=
 
 build:
 	ssh $(N150_HOST) "rm -rf $(N150_STAGE_DIR) && mkdir -p $(N150_STAGE_DIR)"
-	rsync -avz --relative --no-perms --no-owner --no-group --omit-dir-times --exclude .git -e "ssh" ./configuration.nix ./hosts ./k8s/bootstrap $(N150_HOST):$(N150_STAGE_DIR)/
-	ssh -t $(N150_HOST) "sudo rsync -av --no-perms --no-owner --no-group --omit-dir-times $(N150_STAGE_DIR)/ /etc/nixos/ && sudo rsync -av --delete --no-perms --no-owner --no-group --omit-dir-times $(N150_STAGE_DIR)/k8s/bootstrap/ /etc/nixos/k8s/bootstrap/ && cd /etc/nixos && sudo nixos-rebuild switch"
+	rsync -avz --relative --no-perms --no-owner --no-group --omit-dir-times --exclude .git -e "ssh" ./flake.nix ./flake.lock ./configuration.nix ./hosts ./k8s/bootstrap $(N150_HOST):$(N150_STAGE_DIR)/
+	ssh -t $(N150_HOST) "sudo rsync -av --no-perms --no-owner --no-group --omit-dir-times $(N150_STAGE_DIR)/ /etc/nixos/ && sudo rsync -av --delete --no-perms --no-owner --no-group --omit-dir-times $(N150_STAGE_DIR)/k8s/bootstrap/ /etc/nixos/k8s/bootstrap/ && cd /etc/nixos && sudo nixos-rebuild switch --flake /etc/nixos#nixos --option extra-experimental-features 'nix-command flakes'"
 
 access-list:
 	@host="$${HOMELAB_HOST:-$$(ssh $(N150_HOST) 'tailscale status --json' | python3 -c 'import json,sys; print(json.load(sys.stdin)["Self"]["DNSName"].rstrip("."))')}"; \

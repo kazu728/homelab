@@ -2,7 +2,7 @@
   description = "Homelab development environments";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
   };
 
   outputs =
@@ -56,6 +56,17 @@
           homelab = homelabShell;
         }
       );
+
+      nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          ./hosts/n150/configuration.nix
+          {
+            nix.registry.nixpkgs.flake = nixpkgs;
+            nix.nixPath = [ "nixpkgs=${nixpkgs}" ];
+          }
+        ];
+      };
 
     };
 }

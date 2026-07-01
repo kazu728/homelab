@@ -49,12 +49,12 @@
     priority = 100;
   };
 
-  services.logind.extraConfig = ''
-  HandleSuspendKey=ignore
-  HandleHibernateKey=ignore
-  HandleLidSwitch=ignore
-  IdleAction=ignore
-  '';
+  services.logind.settings.Login = {
+    HandleSuspendKey = "ignore";
+    HandleHibernateKey = "ignore";
+    HandleLidSwitch = "ignore";
+    IdleAction = "ignore";
+  };
 
   services.journald.extraConfig = ''
   Storage=persistent
