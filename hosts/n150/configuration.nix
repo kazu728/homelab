@@ -19,6 +19,8 @@
   boot.kernel.sysctl = {
     "net.ipv4.ip_forward" = 1;
   };
+  # ALSA sequencer for capturing USB-MIDI from the piano.
+  boot.kernelModules = [ "snd-seq" ];
 
   networking.hostName = "nixos";
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
@@ -35,10 +37,11 @@
   time.timeZone = "Asia/Tokyo";
   i18n.defaultLocale = "en_US.UTF-8";
 
-  # Firewall: expose k3s API only via tailscale; trust pod networks.
+  # Firewall: only expose ports via tailscale; trust pod networks.
   networking.firewall = {
     enable = true;
-    interfaces.tailscale0.allowedTCPPorts = [ 22 443 8443 6443 32443 30300 31000 31080 ];
+    # 22 SSH, 6443 k3s API, 443/8443 fronted by `tailscale serve` (Grafana / Argo CD).
+    interfaces.tailscale0.allowedTCPPorts = [ 22 443 8443 6443 ];
     trustedInterfaces = [ "cni0" "flannel.1" ];
   };
 
@@ -69,6 +72,10 @@
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
+      # `tailscale serve` exits with "unexpected state: NoState" if it runs
+      # before tailscaled has brought the backend up (e.g. when tailscaled is
+      # restarted mid nixos-rebuild). Wait until the node has an address.
+      ExecStartPre = "${pkgs.bash}/bin/bash -c 'for i in $(${pkgs.coreutils}/bin/seq 60); do ${pkgs.tailscale}/bin/tailscale ip -4 >/dev/null 2>&1 && exit 0; ${pkgs.coreutils}/bin/sleep 1; done; exit 1'";
       ExecStart = [
         "${pkgs.tailscale}/bin/tailscale serve --bg --yes --https 443 http://127.0.0.1:30300"
         "${pkgs.tailscale}/bin/tailscale serve --bg --yes --https 8443 https+insecure://127.0.0.1:32443"
@@ -88,7 +95,7 @@
   users.users.kazuki = {
     isNormalUser = true;
     description = "Kazuki Matsuo";
-    extraGroups = [ "k3s-admin" "networkmanager" "wheel" ];
+    extraGroups = [ "k3s-admin" "networkmanager" "wheel" "audio" ];
   };
   users.groups.k3s-admin = {};
   users.groups.otelcol = {};
@@ -97,6 +104,8 @@
     group = "otelcol";
     extraGroups = [ "systemd-journal" ];
   };
+
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
@@ -110,6 +119,7 @@
     kubeseal
     k9s
     cloudflared
+    alsa-utils
   ];
   # Make kubectl point to k3s kubeconfig by default.
   environment.sessionVariables.KUBECONFIG = "/etc/rancher/k3s/k3s.yaml";
