@@ -10,7 +10,7 @@ spec:
   targetNamespace: argo-cd
   createNamespace: true
   failurePolicy: reinstall
-  backOffLimit: 1000
+  backOffLimit: 20
   valuesContent: |-
     projects:
       bootstrap:

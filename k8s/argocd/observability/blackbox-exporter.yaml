@@ -1,0 +1,120 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: blackbox-exporter
+  namespace: argo-cd
+spec:
+  project: observability
+  source:
+    repoURL: https://prometheus-community.github.io/helm-charts
+    chart: prometheus-blackbox-exporter
+    targetRevision: 11.10.0
+    helm:
+      valuesObject:
+        config:
+          modules:
+            http_2xx:
+              prober: http
+              timeout: 5s
+              http:
+                valid_http_versions: [ "HTTP/1.1", "HTTP/2.0" ]
+                follow_redirects: true
+                preferred_ip_protocol: ip4
+            tcp_connect:
+              prober: tcp
+              timeout: 5s
+            icmp:
+              prober: icmp
+              timeout: 5s
+              icmp:
+                preferred_ip_protocol: ip4
+            dns_a:
+              prober: dns
+              timeout: 5s
+              dns:
+                query_name: google.com
+                query_type: A
+                preferred_ip_protocol: ip4
+
+        securityContext:
+          capabilities:
+            add:
+              - NET_RAW
+
+        serviceMonitor:
+          selfMonitor:
+            enabled: true
+            labels:
+              release: kube-prometheus-stack
+          enabled: true
+          defaults:
+            labels:
+              release: kube-prometheus-stack
+            interval: 30s
+            scrapeTimeout: 10s
+            module: http_2xx
+          targets:
+            - name: cloudflare-https
+              url: https://www.cloudflare.com/cdn-cgi/trace
+              module: http_2xx
+              additionalMetricsRelabels:
+                probe_type: http
+                provider: cloudflare
+            - name: google-https
+              url: https://www.google.com/generate_204
+              module: http_2xx
+              additionalMetricsRelabels:
+                probe_type: http
+                provider: google
+            - name: cloudflare-tcp
+              url: 1.1.1.1:443
+              module: tcp_connect
+              additionalMetricsRelabels:
+                probe_type: tcp
+                provider: cloudflare
+            - name: google-tcp
+              url: 8.8.8.8:443
+              module: tcp_connect
+              additionalMetricsRelabels:
+                probe_type: tcp
+                provider: google
+            - name: cloudflare-icmp
+              url: 1.1.1.1
+              module: icmp
+              additionalMetricsRelabels:
+                probe_type: icmp
+                provider: cloudflare
+            - name: google-icmp
+              url: 8.8.8.8
+              module: icmp
+              additionalMetricsRelabels:
+                probe_type: icmp
+                provider: google
+            - name: cloudflare-dns
+              url: 1.1.1.1:53
+              module: dns_a
+              additionalMetricsRelabels:
+                probe_type: dns
+                provider: cloudflare
+            - name: google-dns
+              url: 8.8.8.8:53
+              module: dns_a
+              additionalMetricsRelabels:
+                probe_type: dns
+                provider: google
+
+        resources:
+          requests:
+            cpu: 20m
+            memory: 32Mi
+          limits:
+            memory: 128Mi
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: observability
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
