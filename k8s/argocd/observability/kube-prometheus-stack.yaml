@@ -42,7 +42,6 @@ spec:
                       description: The loki container in observability/loki-0 restarted during the last 15 minutes.
 
         alertmanager:
-          enabled: true
           alertmanagerSpec:
             resources:
               requests:
@@ -63,9 +62,6 @@ spec:
         kubeProxy:
           enabled: false
 
-        nodeExporter:
-          enabled: true
-
         prometheus-node-exporter:
           hostNetwork: false
 
@@ -76,11 +72,8 @@ spec:
               memory: 150Mi
 
         prometheus:
-          service:
-            type: ClusterIP
           prometheusSpec:
             retention: 30d
-            ruleSelectorNilUsesHelmValues: true
             serviceMonitorSelectorNilUsesHelmValues: false
             externalLabels:
               cluster: n150

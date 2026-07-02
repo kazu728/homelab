@@ -30,10 +30,6 @@ spec:
           cpu: 500m
           memory: 512Mi
     server:
-      extensions:
-        enabled: true
-      certificate:
-        enabled: false
       resources:
         requests:
           cpu: 25m
