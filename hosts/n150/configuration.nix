@@ -1,7 +1,3 @@
-# Edit this configuration file to define what should be installed on
-# your system.  Help is available in the configuration.nix(5) man page
-# and in the NixOS manual (accessible by running ‘nixos-help’).
-
 { pkgs, ... }:
 
 {
@@ -23,23 +19,18 @@
   boot.kernelModules = [ "snd-seq" ];
 
   networking.hostName = "nixos";
-  # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
   networking.networkmanager.enable = true;
   # Disable Wi-Fi power saving to reduce link drops.
   networking.networkmanager.wifi.powersave = false;
 
-  # Disabled by default; enable when you're ready to apply.
   services.networkRecover.enable = true;
-
-  hardware.graphics.enable = false;
 
   time.timeZone = "Asia/Tokyo";
   i18n.defaultLocale = "en_US.UTF-8";
 
   # Firewall: only expose ports via tailscale; trust pod networks.
   networking.firewall = {
-    enable = true;
     # 22 SSH, 6443 k3s API, 443/8443 fronted by `tailscale serve` (Grafana / Argo CD).
     interfaces.tailscale0.allowedTCPPorts = [ 22 443 8443 6443 ];
     trustedInterfaces = [ "cni0" "flannel.1" ];
@@ -88,10 +79,8 @@
     openFirewall = false;
     settings.PasswordAuthentication = false;
     settings.KbdInteractiveAuthentication = false;
-    settings.PubkeyAuthentication = true;
   };
 
-  # Define a user account. Don't forget to set a password with 'passwd'.
   users.users.kazuki = {
     isNormalUser = true;
     description = "Kazuki Matsuo";
@@ -109,15 +98,11 @@
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
-  # List packages installed in system profile. To search, run:
-  # $ nix search wget
   environment.systemPackages = with pkgs; [
     neovim
     kubectl
     kubernetes-helm
-    kubeseal
     k9s
-    cloudflared
     alsa-utils
   ];
   # Make kubectl point to k3s kubeconfig by default.
@@ -177,21 +162,6 @@
       StateDirectoryMode = "0750";
     };
   };
-  # Some programs need SUID wrappers, can be configured further or are
-  # started in user sessions.
-  # programs.mtr.enable = true;
-  # programs.gnupg.agent = {
-  #   enable = true;
-  #   enableSSHSupport = true;
-  # };
-
-  # List services that you want to enable:
-
-  # Open ports in the firewall.
-  # networking.firewall.allowedTCPPorts = [ ... ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
-  # Or disable the firewall altogether.
-  # networking.firewall.enable = false;
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
