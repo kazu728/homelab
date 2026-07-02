@@ -1,7 +1,6 @@
 .PHONY: build access-list
 N150_HOST ?= n150
 N150_STAGE_DIR ?= /tmp/nixos-sync
-HOMELAB_HOST ?=
 RSYNC_FLAGS := -av --no-perms --no-owner --no-group --omit-dir-times
 
 build:
