@@ -59,49 +59,41 @@ spec:
               module: http_2xx
               additionalMetricsRelabels:
                 probe_type: http
-                provider: cloudflare
             - name: google-https
               url: https://www.google.com/generate_204
               module: http_2xx
               additionalMetricsRelabels:
                 probe_type: http
-                provider: google
             - name: cloudflare-tcp
               url: 1.1.1.1:443
               module: tcp_connect
               additionalMetricsRelabels:
                 probe_type: tcp
-                provider: cloudflare
             - name: google-tcp
               url: 8.8.8.8:443
               module: tcp_connect
               additionalMetricsRelabels:
                 probe_type: tcp
-                provider: google
             - name: cloudflare-icmp
               url: 1.1.1.1
               module: icmp
               additionalMetricsRelabels:
                 probe_type: icmp
-                provider: cloudflare
             - name: google-icmp
               url: 8.8.8.8
               module: icmp
               additionalMetricsRelabels:
                 probe_type: icmp
-                provider: google
             - name: cloudflare-dns
               url: 1.1.1.1:53
               module: dns_a
               additionalMetricsRelabels:
                 probe_type: dns
-                provider: cloudflare
             - name: google-dns
               url: 8.8.8.8:53
               module: dns_a
               additionalMetricsRelabels:
                 probe_type: dns
-                provider: google
 
         resources:
           requests:
