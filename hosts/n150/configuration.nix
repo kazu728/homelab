@@ -102,7 +102,6 @@
   users.users.otelcol = {
     isSystemUser = true;
     group = "otelcol";
-    extraGroups = [ "systemd-journal" ];
   };
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
@@ -193,21 +192,6 @@
   # networking.firewall.allowedUDPPorts = [ ... ];
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
-
-  # ============================================================
-  # GUI Recovery Configuration (for emergency use)
-  # 画面復旧用設定（緊急時のみ使用）
-  # ============================================================
-  services.xserver.enable = false;
-  services.xserver.displayManager.gdm.enable = false;
-  services.xserver.desktopManager.gnome.enable = false;
-
-  services.libinput.enable = true;
-  services.xserver.xkb = {
-    layout = "jp";
-    variant = "";
-  };
-
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions

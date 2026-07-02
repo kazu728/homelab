@@ -36,19 +36,12 @@
 
           homelabShell = mkShell {
             packages = with pkgs; [
-              go_1_25
-              gopls
-              gotools
-              go-tools
-              google-cloud-sdk
               terraform
               terraform-ls
               tflint
               zizmor
               actionlint
             ];
-
-            GOTOOLCHAIN = "local";
           };
         in
         {
