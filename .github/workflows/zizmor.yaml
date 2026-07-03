@@ -25,6 +25,6 @@ jobs:
           persist-credentials: false
       - uses: zizmorcore/zizmor-action@b1d7e1fb5de872772f31590499237e7cce841e8e
         with:
-          advanced-security: true
+          advanced-security: false
           annotations: true
           fail-on-no-inputs: false
