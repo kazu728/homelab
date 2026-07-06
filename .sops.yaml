@@ -1,0 +1,8 @@
+keys:
+  - &n150 age1p3676vxd9f67kyq4ayr7j7n8pc938w20jr0vkypztzheh6pd3s2qtk44uw
+
+creation_rules:
+  - path_regex: hosts/n150/secrets\.yaml$
+    key_groups:
+      - age:
+          - *n150

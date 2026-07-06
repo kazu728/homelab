@@ -1,4 +1,4 @@
-{ lib, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 let
   k3sBootstrapManifestDir = ../../k8s/bootstrap;
@@ -119,6 +119,16 @@ in
   environment.sessionVariables.KUBECONFIG = "/etc/rancher/k3s/k3s.yaml";
   environment.etc."otelcol/config.yaml".source = ./otelcol/config.yaml;
 
+  sops.defaultSopsFile = ./secrets.yaml;
+  sops.age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+  sops.secrets."alertmanager-slack-webhook-url" = {
+    key = "alertmanager_slack_webhook_url";
+    owner = "root";
+    group = "root";
+    mode = "0400";
+    restartUnits = [ "homelab-alertmanager-webhook-secret.service" ];
+  };
+
   # Lightweight single-node k3s
   services.k3s = {
     enable = true;
@@ -170,6 +180,59 @@ in
 
     ${pkgs.coreutils}/bin/mv -f -- "$next_state" "$state"
   '';
+
+  systemd.services.homelab-alertmanager-webhook-secret = {
+    description = "Sync Alertmanager Slack webhook URL into Kubernetes";
+    after = [ "k3s.service" ];
+    wants = [ "k3s.service" ];
+    wantedBy = [ "multi-user.target" ];
+    path = [
+      pkgs.coreutils
+      pkgs.kubectl
+    ];
+    serviceConfig = {
+      Type = "oneshot";
+    };
+    script = ''
+      set -euo pipefail
+
+      secret_file=${lib.escapeShellArg config.sops.secrets."alertmanager-slack-webhook-url".path}
+      if [ ! -s "$secret_file" ]; then
+        echo "Missing Alertmanager Slack webhook URL file: $secret_file" >&2
+        exit 1
+      fi
+
+      export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+
+      for _ in $(seq 120); do
+        if kubectl get --raw=/readyz >/dev/null 2>&1; then
+          ready=1
+          break
+        fi
+        sleep 1
+      done
+      if [ "''${ready:-0}" != 1 ]; then
+        echo "Timed out waiting for k3s API readiness" >&2
+        exit 1
+      fi
+
+      kubectl create namespace observability --dry-run=client -o yaml \
+        | kubectl apply -f -
+      kubectl -n observability create secret generic homelab-alertmanager-webhook \
+        --from-file=url="$secret_file" \
+        --dry-run=client -o yaml \
+        | kubectl apply -f -
+    '';
+  };
+
+  systemd.timers.homelab-alertmanager-webhook-secret = {
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnBootSec = "2min";
+      OnUnitActiveSec = "10min";
+      Unit = "homelab-alertmanager-webhook-secret.service";
+    };
+  };
 
   systemd.services.otelcol = {
     description = "OpenTelemetry Collector (journald -> Loki)";
