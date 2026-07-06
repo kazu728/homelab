@@ -75,6 +75,9 @@ spec:
           prometheusSpec:
             retention: 30d
             serviceMonitorSelectorNilUsesHelmValues: false
+            ruleSelector:
+              matchLabels:
+                release: kube-prometheus-stack
             externalLabels:
               cluster: n150
             resources:

@@ -44,12 +44,8 @@ spec:
         serviceMonitor:
           selfMonitor:
             enabled: true
-            labels:
-              release: kube-prometheus-stack
           enabled: true
           defaults:
-            labels:
-              release: kube-prometheus-stack
             interval: 30s
             scrapeTimeout: 10s
             module: http_2xx
