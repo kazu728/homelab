@@ -73,6 +73,8 @@ in
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
+      Restart = "on-failure";
+      RestartSec = "30s";
       # `tailscale serve` exits with "unexpected state: NoState" if it runs
       # before tailscaled has brought the backend up (e.g. when tailscaled is
       # restarted mid nixos-rebuild). Wait until the node has an address.

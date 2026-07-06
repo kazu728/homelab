@@ -15,7 +15,13 @@ spec:
       skipCrds: true
       valuesObject:
         defaultRules:
-          create: false
+          create: true
+          rules:
+            etcd: false
+            kubeControllerManager: false
+            kubeProxy: false
+            kubeSchedulerAlerting: false
+            kubeSchedulerRecording: false
 
         additionalPrometheusRulesMap:
           homelab-observability:
@@ -42,7 +48,54 @@ spec:
                       description: The loki container in observability/loki-0 restarted during the last 15 minutes.
 
         alertmanager:
+          config:
+            global:
+              resolve_timeout: 5m
+            inhibit_rules:
+              - source_matchers:
+                  - 'severity = critical'
+                target_matchers:
+                  - 'severity =~ warning|info'
+                equal:
+                  - namespace
+                  - alertname
+              - source_matchers:
+                  - 'severity = warning'
+                target_matchers:
+                  - 'severity = info'
+                equal:
+                  - namespace
+                  - alertname
+              - source_matchers:
+                  - 'alertname = InfoInhibitor'
+                target_matchers:
+                  - 'severity = info'
+                equal:
+                  - namespace
+              - target_matchers:
+                  - 'alertname = InfoInhibitor'
+            route:
+              group_by: [ namespace, alertname ]
+              group_wait: 30s
+              group_interval: 5m
+              repeat_interval: 12h
+              receiver: homelab-slack
+              routes:
+                - receiver: 'null'
+                  matchers:
+                    - 'alertname = Watchdog'
+            receivers:
+              - name: 'null'
+              - name: homelab-slack
+                slack_configs:
+                  - send_resolved: true
+                    # Secret key: homelab-alertmanager-webhook/url
+                    api_url_file: /etc/alertmanager/secrets/homelab-alertmanager-webhook/url
+            templates:
+              - /etc/alertmanager/config/*.tmpl
           alertmanagerSpec:
+            secrets:
+              - homelab-alertmanager-webhook
             resources:
               requests:
                 cpu: 20m
@@ -74,6 +127,7 @@ spec:
         prometheus:
           prometheusSpec:
             retention: 30d
+            retentionSize: 8GiB
             serviceMonitorSelectorNilUsesHelmValues: false
             ruleSelector:
               matchLabels:

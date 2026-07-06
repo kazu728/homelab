@@ -20,6 +20,15 @@ spec:
                 valid_http_versions: [ "HTTP/1.1", "HTTP/2.0" ]
                 follow_redirects: true
                 preferred_ip_protocol: ip4
+            http_2xx_insecure:
+              prober: http
+              timeout: 5s
+              http:
+                valid_http_versions: [ "HTTP/1.1", "HTTP/2.0" ]
+                follow_redirects: true
+                preferred_ip_protocol: ip4
+                tls_config:
+                  insecure_skip_verify: true
             tcp_connect:
               prober: tcp
               timeout: 5s
@@ -60,6 +69,18 @@ spec:
               module: http_2xx
               additionalMetricsRelabels:
                 probe_type: http
+            - name: homelab-grafana-tailscale
+              url: https://100.67.38.61/
+              module: http_2xx_insecure
+              additionalMetricsRelabels:
+                probe_type: http
+                service: grafana
+            - name: homelab-argocd-tailscale
+              url: https://100.67.38.61:8443/
+              module: http_2xx_insecure
+              additionalMetricsRelabels:
+                probe_type: http
+                service: argocd
             - name: cloudflare-tcp
               url: 1.1.1.1:443
               module: tcp_connect
@@ -97,6 +118,21 @@ spec:
             memory: 32Mi
           limits:
             memory: 128Mi
+
+        prometheusRule:
+          enabled: true
+          additionalLabels:
+            release: kube-prometheus-stack
+          rules:
+            - alert: BlackboxProbeFailed
+              expr: probe_success == 0
+              for: 5m
+              labels:
+                severity: warning
+                component: blackbox-exporter
+              annotations:
+                summary: Blackbox probe failed
+                description: The {{ $labels.probe_type }} probe for {{ $labels.target }} has failed for at least 5 minutes.
   destination:
     server: https://kubernetes.default.svc
     namespace: observability
