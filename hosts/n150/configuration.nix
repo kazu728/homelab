@@ -1,5 +1,15 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 
+let
+  k3sBootstrapManifestDir = ../../k8s/bootstrap;
+  k3sBootstrapManifestNames =
+    builtins.attrNames (
+      lib.filterAttrs
+        (name: type: type == "regular" && lib.hasSuffix ".yaml" name)
+        (builtins.readDir k3sBootstrapManifestDir)
+    );
+  k3sBootstrapManifestArgs = lib.concatMapStringsSep " " lib.escapeShellArg k3sBootstrapManifestNames;
+in
 {
   imports =
     [
@@ -117,33 +127,49 @@
     extraFlags = "--write-kubeconfig-mode=640 --write-kubeconfig-group=k3s-admin --disable traefik --disable servicelb --kubelet-arg=max-pods=50 --resolv-conf=/etc/resolv.conf";
   };
 
-  systemd.services.k3s-manifests = {
-    description = "Link k3s bootstrap manifests from /etc/nixos";
-    before = [ "k3s.service" ];
-    wantedBy = [ "k3s.service" ];
-    serviceConfig = {
-      Type = "oneshot";
-    };
-    script = ''
-      set -euo pipefail
+  # Keep real files in k3s' watched manifests directory so bootstrap chart
+  # changes are observed during `nixos-rebuild switch`.
+  system.activationScripts.k3s-bootstrap-manifests.text = ''
+    set -euo pipefail
 
-      src=/etc/nixos/k8s/bootstrap
-      dst=/var/lib/rancher/k3s/server/manifests
+    src=${k3sBootstrapManifestDir}
+    dst=/var/lib/rancher/k3s/server/manifests
+    state="$dst/.homelab-bootstrap-manifests"
+    next_state="$dst/.homelab-bootstrap-manifests.next"
 
-      ${pkgs.coreutils}/bin/install -d -m 0755 "$dst"
-      if [ -d "$src" ]; then
-        for f in "$src"/*.yaml; do
-          [ -e "$f" ] || continue
-          ${pkgs.coreutils}/bin/ln -sf "$f" "$dst/$(basename "$f")"
-        done
+    ${pkgs.coreutils}/bin/install -d -m 0755 "$dst"
+
+    for link in "$dst"/*.yaml; do
+      [ -L "$link" ] || continue
+      target=$(${pkgs.coreutils}/bin/readlink "$link")
+      case "$target" in
+        /etc/nixos/k8s/bootstrap/*)
+          ${pkgs.coreutils}/bin/rm -f -- "$link"
+          ;;
+      esac
+    done
+
+    : > "$next_state"
+    for name in ${k3sBootstrapManifestArgs}; do
+      ${pkgs.coreutils}/bin/printf '%s\n' "$name" >> "$next_state"
+      if [ -L "$dst/$name" ] || ! ${pkgs.diffutils}/bin/cmp -s "$src/$name" "$dst/$name"; then
+        tmp="$dst/.$name.tmp"
+        ${pkgs.coreutils}/bin/install -m 0644 "$src/$name" "$tmp"
+        ${pkgs.coreutils}/bin/mv -f -- "$tmp" "$dst/$name"
       fi
-      for link in "$dst"/*.yaml; do
-        if [ -L "$link" ] && [ ! -e "$link" ]; then
-          ${pkgs.coreutils}/bin/rm -f "$link"
+    done
+
+    if [ -f "$state" ]; then
+      while IFS= read -r name; do
+        [ -n "$name" ] || continue
+        if ! ${pkgs.gnugrep}/bin/grep -qxF -- "$name" "$next_state"; then
+          ${pkgs.coreutils}/bin/rm -f -- "$dst/$name"
         fi
-      done
-    '';
-  };
+      done < "$state"
+    fi
+
+    ${pkgs.coreutils}/bin/mv -f -- "$next_state" "$state"
+  '';
 
   systemd.services.otelcol = {
     description = "OpenTelemetry Collector (journald -> Loki)";
