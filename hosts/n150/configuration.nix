@@ -65,8 +65,8 @@ in
   '';
 
   services.tailscale.enable = true;
-  systemd.services.tailscale-serve-grafana = {
-    description = "Tailscale HTTPS serve for Grafana and Argo CD";
+  systemd.services.tailscale-serve-homelab = {
+    description = "Tailscale HTTPS serve for homelab services";
     after = [ "network-online.target" "tailscaled.service" ];
     wants = [ "network-online.target" "tailscaled.service" ];
     wantedBy = [ "multi-user.target" ];

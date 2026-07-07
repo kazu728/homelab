@@ -10,9 +10,25 @@ build:
 
 access-list:
 	@host="$${HOMELAB_HOST:-$$(ssh $(N150_HOST) 'tailscale status --json' | python3 -c 'import json,sys; print(json.load(sys.stdin)["Self"]["DNSName"].rstrip("."))')}"; \
-	ssh -o LogLevel=ERROR -t $(N150_HOST) "sudo env KUBECONFIG=/etc/rancher/k3s/k3s.yaml HOMELAB_ACCESS_HOST='$$host' sh -c 'set -eu; \
-	grafana_user=\$$(kubectl -n observability get secret grafana-admin -o jsonpath=\"{.data.admin-user}\" | base64 --decode); \
-	grafana_pass=\$$(kubectl -n observability get secret grafana-admin -o jsonpath=\"{.data.admin-password}\" | base64 --decode); \
-	argo_pass_base64=\$$(kubectl -n argo-cd get secret argocd-initial-admin-secret -o jsonpath=\"{.data.password}\" 2>/dev/null || kubectl -n argo-cd get secret argo-cd-initial-admin-secret -o jsonpath=\"{.data.password}\" 2>/dev/null); \
-	argo_pass=\$$(printf \"%s\" \"\$$argo_pass_base64\" | base64 --decode); \
-	printf \"Homelab access endpoints:\\n  Grafana: https://%s/\\n  Argo CD: https://%s:8443/\\n\\nCredentials:\\n  Grafana:\\n    user: %s\\n    pass: %s\\n  Argo CD:\\n    user: admin\\n    pass: %s\\n\" \"\$$HOMELAB_ACCESS_HOST\" \"\$$HOMELAB_ACCESS_HOST\" \"\$$grafana_user\" \"\$$grafana_pass\" \"\$$argo_pass\"'"
+	[ -n "$$host" ] || { echo "HOMELAB_ACCESS_HOST is empty" >&2; exit 1; }; \
+	case "$$host" in (*[!A-Za-z0-9._:-]*) echo "Invalid HOMELAB_ACCESS_HOST: $$host" >&2; exit 1;; esac; \
+	remote_cmd=$$(printf '%s\n' \
+		"sudo env KUBECONFIG=/etc/rancher/k3s/k3s.yaml HOMELAB_ACCESS_HOST=$$host sh <<'REMOTE_SCRIPT'" \
+		"set -eu" \
+		"grafana_user=\$$(kubectl -n observability get secret grafana-admin -o jsonpath='{.data.admin-user}' | base64 --decode)" \
+		"grafana_pass=\$$(kubectl -n observability get secret grafana-admin -o jsonpath='{.data.admin-password}' | base64 --decode)" \
+		"argo_pass_base64=\$$(kubectl -n argo-cd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}')" \
+		"argo_pass=\$$(printf '%s' \"\$$argo_pass_base64\" | base64 --decode)" \
+		"printf 'Homelab access endpoints:\\n'" \
+		"printf '  Grafana: https://%s/\\n' \"\$$HOMELAB_ACCESS_HOST\"" \
+		"printf '  Argo CD: https://%s:8443/\\n\\n' \"\$$HOMELAB_ACCESS_HOST\"" \
+		"printf 'Credentials:\\n'" \
+		"printf '  Grafana:\\n'" \
+		"printf '    user: %s\\n' \"\$$grafana_user\"" \
+		"printf '    pass: %s\\n' \"\$$grafana_pass\"" \
+		"printf '  Argo CD:\\n'" \
+		"printf '    user: admin\\n'" \
+		"printf '    pass: %s\\n' \"\$$argo_pass\"" \
+		"REMOTE_SCRIPT" \
+	); \
+	ssh -o LogLevel=ERROR -tt $(N150_HOST) "$$remote_cmd"
