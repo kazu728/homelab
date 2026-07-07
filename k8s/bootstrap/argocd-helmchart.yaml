@@ -6,7 +6,7 @@ metadata:
 spec:
   chart: argo-cd
   repo: https://argoproj.github.io/argo-helm
-  version: 7.8.7
+  version: 10.1.2
   targetNamespace: argo-cd
   createNamespace: true
   valuesContent: |-
