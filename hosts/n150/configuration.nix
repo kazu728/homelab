@@ -128,7 +128,15 @@ in
     owner = "root";
     group = "root";
     mode = "0400";
-    restartUnits = [ "homelab-alertmanager-webhook-secret.service" ];
+    restartUnits = [ "homelab-kubernetes-secrets.service" ];
+  };
+  sops.secrets."grafana-admin-password" = {
+    sopsFile = ./grafana-secrets.yaml;
+    key = "grafana_admin_password";
+    owner = "root";
+    group = "root";
+    mode = "0400";
+    restartUnits = [ "homelab-kubernetes-secrets.service" ];
   };
 
   # Lightweight single-node k3s
@@ -183,8 +191,8 @@ in
     ${pkgs.coreutils}/bin/mv -f -- "$next_state" "$state"
   '';
 
-  systemd.services.homelab-alertmanager-webhook-secret = {
-    description = "Sync Alertmanager Slack webhook URL into Kubernetes";
+  systemd.services.homelab-kubernetes-secrets = {
+    description = "Sync homelab secrets into Kubernetes";
     after = [ "k3s.service" ];
     wants = [ "k3s.service" ];
     wantedBy = [ "multi-user.target" ];
@@ -198,11 +206,16 @@ in
     script = ''
       set -euo pipefail
 
-      secret_file=${lib.escapeShellArg config.sops.secrets."alertmanager-slack-webhook-url".path}
-      if [ ! -s "$secret_file" ]; then
-        echo "Missing Alertmanager Slack webhook URL file: $secret_file" >&2
+      alertmanager_webhook_file=${lib.escapeShellArg config.sops.secrets."alertmanager-slack-webhook-url".path}
+      grafana_admin_password_file=${lib.escapeShellArg config.sops.secrets."grafana-admin-password".path}
+
+      for secret_file in "$alertmanager_webhook_file" "$grafana_admin_password_file"; do
+        if [ -s "$secret_file" ]; then
+          continue
+        fi
+        echo "Missing homelab secret file: $secret_file" >&2
         exit 1
-      fi
+      done
 
       export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 
@@ -221,18 +234,38 @@ in
       kubectl create namespace observability --dry-run=client -o yaml \
         | kubectl apply -f -
       kubectl -n observability create secret generic homelab-alertmanager-webhook \
-        --from-file=url="$secret_file" \
+        --from-file=url="$alertmanager_webhook_file" \
         --dry-run=client -o yaml \
         | kubectl apply -f -
+      kubectl -n observability create secret generic grafana-admin \
+        --from-literal=admin-user=admin \
+        --from-file=admin-password="$grafana_admin_password_file" \
+        --dry-run=client -o yaml \
+        | kubectl apply -f -
+
+      if kubectl -n observability wait --for=condition=Ready pod \
+        -l app.kubernetes.io/name=grafana,app.kubernetes.io/instance=grafana \
+        --timeout=10s >/dev/null 2>&1; then
+        grafana_pod=$(kubectl -n observability get pod \
+          -l app.kubernetes.io/name=grafana,app.kubernetes.io/instance=grafana \
+          -o jsonpath='{.items[0].metadata.name}')
+        grafana_password=$(cat "$grafana_admin_password_file")
+        kubectl -n observability exec "$grafana_pod" -c grafana \
+          -- grafana cli admin reset-admin-password "$grafana_password" >/dev/null 2>&1 \
+          || kubectl -n observability exec "$grafana_pod" -c grafana \
+            -- grafana-cli admin reset-admin-password "$grafana_password" >/dev/null
+      else
+        echo "Grafana pod is not ready; admin password reset will retry on the next timer run" >&2
+      fi
     '';
   };
 
-  systemd.timers.homelab-alertmanager-webhook-secret = {
+  systemd.timers.homelab-kubernetes-secrets = {
     wantedBy = [ "timers.target" ];
     timerConfig = {
       OnBootSec = "2min";
       OnUnitActiveSec = "10min";
-      Unit = "homelab-alertmanager-webhook-secret.service";
+      Unit = "homelab-kubernetes-secrets.service";
     };
   };
 
