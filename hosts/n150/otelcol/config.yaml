@@ -14,14 +14,15 @@ processors:
     check_interval: 5s
     limit_mib: 200
     spike_limit_mib: 50
+  resourcedetection:
+    detectors: [system]
+    system:
+      hostname_sources: [os]
   resource:
     attributes:
       - key: service.name
         value: systemd-journal
         action: insert
-      - key: host.name
-        value: n150
-        action: upsert
   batch:
 
 exporters:
@@ -33,5 +34,5 @@ service:
   pipelines:
     logs:
       receivers: [journald]
-      processors: [memory_limiter, resource, batch]
+      processors: [memory_limiter, resourcedetection, resource, batch]
       exporters: [otlphttp]
