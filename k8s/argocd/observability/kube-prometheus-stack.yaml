@@ -117,12 +117,20 @@ spec:
 
         prometheus-node-exporter:
           hostNetwork: false
+          resources:
+            requests:
+              cpu: 20m
+              memory: 32Mi
+            limits:
+              memory: 64Mi
 
         prometheusOperator:
           resources:
             requests:
               cpu: 100m
               memory: 150Mi
+            limits:
+              memory: 300Mi
 
         prometheus:
           prometheusSpec:
@@ -138,6 +146,8 @@ spec:
               requests:
                 cpu: 200m
                 memory: 200Mi
+              limits:
+                memory: 1Gi
             storageSpec:
               volumeClaimTemplate:
                 spec:
@@ -146,11 +156,13 @@ spec:
                   resources:
                     requests:
                       storage: 10Gi
-        kubeStateMetrics:
+        kube-state-metrics:
           resources:
             requests:
               cpu: 50m
               memory: 100Mi
+            limits:
+              memory: 200Mi
   destination:
     server: https://kubernetes.default.svc
     namespace: observability

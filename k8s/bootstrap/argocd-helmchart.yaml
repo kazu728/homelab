@@ -19,7 +19,6 @@ spec:
           cpu: 100m
           memory: 512Mi
         limits:
-          cpu: 500m
           memory: 1Gi
     repoServer:
       resources:
@@ -27,7 +26,6 @@ spec:
           cpu: 50m
           memory: 128Mi
         limits:
-          cpu: 500m
           memory: 512Mi
     server:
       resources:
@@ -35,8 +33,35 @@ spec:
           cpu: 25m
           memory: 128Mi
         limits:
-          cpu: 250m
           memory: 512Mi
       service:
         type: NodePort
         nodePortHttps: 32443
+    redis:
+      resources:
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          memory: 128Mi
+    dex:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 32Mi
+        limits:
+          memory: 64Mi
+    applicationSet:
+      resources:
+        requests:
+          cpu: 25m
+          memory: 64Mi
+        limits:
+          memory: 128Mi
+    notifications:
+      resources:
+        requests:
+          cpu: 25m
+          memory: 64Mi
+        limits:
+          memory: 128Mi

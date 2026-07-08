@@ -38,6 +38,12 @@ spec:
           enabled: false
 
         sidecar:
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 64Mi
           dashboards:
             enabled: true
             label: grafana_dashboard

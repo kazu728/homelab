@@ -59,6 +59,12 @@ spec:
 
         gateway:
           enabled: true
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 32Mi
 
         sidecar:
           rules:
