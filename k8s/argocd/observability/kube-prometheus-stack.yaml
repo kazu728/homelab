@@ -29,23 +29,23 @@ spec:
               - name: homelab-observability
                 rules:
                   - alert: LokiContainerNotReady
-                    expr: kube_pod_container_status_ready{namespace="observability", pod="loki-0", container="loki"} == 0
+                    expr: kube_pod_container_status_ready{namespace="observability", container="loki"} == 0
                     for: 5m
                     labels:
                       severity: critical
                       component: loki
                     annotations:
                       summary: Loki container is not ready
-                      description: The loki container in observability/loki-0 has been unready for at least 5 minutes.
+                      description: The loki container in observability/{{ $labels.pod }} has been unready for at least 5 minutes.
                   - alert: LokiContainerRestarting
-                    expr: increase(kube_pod_container_status_restarts_total{namespace="observability", pod="loki-0", container="loki"}[15m]) > 0
+                    expr: increase(kube_pod_container_status_restarts_total{namespace="observability", container="loki"}[15m]) > 0
                     for: 5m
                     labels:
                       severity: warning
                       component: loki
                     annotations:
                       summary: Loki container is restarting
-                      description: The loki container in observability/loki-0 restarted during the last 15 minutes.
+                      description: The loki container in observability/{{ $labels.pod }} restarted during the last 15 minutes.
 
         alertmanager:
           config:

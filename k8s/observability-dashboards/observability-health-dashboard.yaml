@@ -52,8 +52,8 @@ data:
           "targets": [
             {
               "datasource": { "type": "prometheus", "uid": "${datasource}" },
-              "expr": "kube_pod_container_status_ready{namespace=\"observability\", pod=\"loki-0\", container=\"loki\"}",
-              "legendFormat": "loki-0",
+              "expr": "kube_pod_container_status_ready{namespace=\"observability\", container=\"loki\"}",
+              "legendFormat": "loki",
               "refId": "A"
             }
           ],
@@ -85,7 +85,7 @@ data:
           "targets": [
             {
               "datasource": { "type": "prometheus", "uid": "${datasource}" },
-              "expr": "increase(kube_pod_container_status_restarts_total{namespace=\"observability\", pod=\"loki-0\", container=\"loki\"}[1h])",
+              "expr": "increase(kube_pod_container_status_restarts_total{namespace=\"observability\", container=\"loki\"}[1h])",
               "legendFormat": "loki",
               "refId": "A"
             }
@@ -214,7 +214,7 @@ data:
           "targets": [
             {
               "datasource": { "type": "prometheus", "uid": "${datasource}" },
-              "expr": "increase(kube_pod_container_status_restarts_total{namespace=\"observability\", pod=\"loki-0\", container=\"loki\"}[5m])",
+              "expr": "increase(kube_pod_container_status_restarts_total{namespace=\"observability\", container=\"loki\"}[5m])",
               "legendFormat": "loki",
               "refId": "A"
             }
