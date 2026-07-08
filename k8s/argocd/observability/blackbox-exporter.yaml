@@ -69,14 +69,14 @@ spec:
               module: http_2xx
               additionalMetricsRelabels:
                 probe_type: http
-            - name: homelab-grafana-tailscale
-              url: https://100.67.38.61/
-              module: http_2xx_insecure
+            - name: homelab-grafana-internal
+              url: http://grafana.observability.svc.cluster.local/
+              module: http_2xx
               additionalMetricsRelabels:
                 probe_type: http
                 service: grafana
-            - name: homelab-argocd-tailscale
-              url: https://100.67.38.61:8443/
+            - name: homelab-argocd-internal
+              url: https://argo-cd-argocd-server.argo-cd.svc.cluster.local/
               module: http_2xx_insecure
               additionalMetricsRelabels:
                 probe_type: http
