@@ -59,7 +59,9 @@ spec:
 
         gateway:
           enabled: true
-          affinity: {}
+          affinity:
+            podAntiAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution: []
           resources:
             requests:
               cpu: 10m
