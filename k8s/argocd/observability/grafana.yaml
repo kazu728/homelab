@@ -46,6 +46,7 @@ spec:
               memory: 128Mi
           dashboards:
             enabled: true
+            resource: configmap
             label: grafana_dashboard
             labelValue: "1"
             searchNamespace: observability
