@@ -65,6 +65,10 @@
     ];
   };
 
+  # Login is gated by the Secure Enclave SSH key (password auth disabled above),
+  # so drop the redundant sudo password for the single wheel user.
+  security.sudo.wheelNeedsPassword = false;
+
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   # Allow unfree packages
