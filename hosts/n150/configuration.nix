@@ -60,6 +60,9 @@
     isNormalUser = true;
     description = "Kazuki Matsuo";
     extraGroups = [ "k3s-admin" "networkmanager" "wheel" "audio" ];
+    openssh.authorizedKeys.keys = [
+      "ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBHxrSOVyERLr5n6WAxcHo8lKeiVR4ai2bqbC68lR/Vt8MEv2JKmvZQh6aoO9eSbs6m3vG3czdB1Dn6nQkErOcRA= github@secretive.mba.local"
+    ];
   };
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
