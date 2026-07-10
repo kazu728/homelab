@@ -48,12 +48,13 @@ in
     restartUnits = [ "homelab-kubernetes-secrets.service" ];
   };
 
-  # Lightweight single-node k3s
+  # Lightweight single-node k3s. Bind NodePort to loopback only (nodeport-addresses):
+  # all consumers reach it via localhost, dropping its LAN exposure through FORWARD.
   services.k3s = {
     enable = true;
     role = "server";
     clusterInit = true;
-    extraFlags = "--write-kubeconfig-mode=640 --write-kubeconfig-group=k3s-admin --disable traefik --disable servicelb --kubelet-arg=max-pods=50 --resolv-conf=/etc/resolv.conf";
+    extraFlags = "--write-kubeconfig-mode=640 --write-kubeconfig-group=k3s-admin --disable traefik --disable servicelb --kubelet-arg=max-pods=50 --kube-proxy-arg=nodeport-addresses=127.0.0.0/8 --resolv-conf=/etc/resolv.conf";
   };
 
   # Keep real files in k3s' watched manifests directory so bootstrap chart
