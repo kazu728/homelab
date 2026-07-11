@@ -73,7 +73,8 @@ spec:
             enabled: true
             containerPort: 4318
             servicePort: 4318
-            nodePort: 31318
+            # Suppress the chart's default hostPort (4318) so the receiver is
+            # reachable only via the ClusterIP, never on a host interface.
             hostPort: null
             protocol: TCP
           prometheus:
@@ -97,7 +98,10 @@ spec:
 
         service:
           enabled: true
-          type: NodePort
+          # Pinned so the host otelcol has a stable OTLP target
+          # (hosts/n150/otelcol/config.yaml). Reached via kube-proxy ClusterIP
+          # DNAT, which — unlike a loopback NodePort — does not need route_localnet.
+          clusterIP: 10.43.0.100
 
         resources:
           requests:

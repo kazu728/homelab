@@ -1,7 +1,9 @@
 { pkgs, ... }:
 
 {
-  # 443/8443 fronted by `tailscale serve` (Grafana / Argo CD).
+  # 443/8443 fronted by `tailscale serve` (Grafana / Argo CD). The loopback
+  # NodePorts must match k8s/argocd/observability/grafana.yaml (30300) and
+  # k8s/bootstrap/argocd-helmchart.yaml (32443).
   networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ 443 8443 ];
 
   services.tailscale.enable = true;

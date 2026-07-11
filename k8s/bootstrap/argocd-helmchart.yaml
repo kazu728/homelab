@@ -36,6 +36,8 @@ spec:
           memory: 512Mi
       service:
         type: NodePort
+        # Loopback-bound NodePort fronted by tailscale serve;
+        # must match hosts/n150/modules/tailscale.nix.
         nodePortHttps: 32443
     redis:
       resources:

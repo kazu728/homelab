@@ -13,6 +13,8 @@ spec:
       valuesObject:
         service:
           type: NodePort
+          # Loopback-bound NodePort fronted by tailscale serve;
+          # must match hosts/n150/modules/tailscale.nix.
           nodePort: 30300
 
         admin:
