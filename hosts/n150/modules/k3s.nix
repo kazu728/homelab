@@ -53,7 +53,6 @@ in
   services.k3s = {
     enable = true;
     role = "server";
-    clusterInit = true;
     extraFlags = "--write-kubeconfig-mode=640 --write-kubeconfig-group=k3s-admin --disable traefik --disable servicelb --kubelet-arg=max-pods=50 --kube-proxy-arg=nodeport-addresses=127.0.0.0/8 --resolv-conf=/etc/resolv.conf";
   };
 
