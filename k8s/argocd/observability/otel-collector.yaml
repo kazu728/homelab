@@ -11,6 +11,8 @@ spec:
     targetRevision: 0.142.1
     helm:
       valuesObject:
+        # daemonset: the logsCollection preset's filelog receiver tails each
+        # node's /var/log/pods, so this must run on every node.
         mode: daemonset
 
         image:
@@ -73,9 +75,12 @@ spec:
             enabled: true
             containerPort: 4318
             servicePort: 4318
-            # Suppress the chart's default hostPort (4318) so the receiver is
-            # reachable only via the ClusterIP, never on a host interface.
-            hostPort: null
+            # Daemonset mode makes the chart emit a default hostPort (4318),
+            # which would expose the receiver on every host interface. We reach
+            # it via the ClusterIP instead, so disable the hostPort. Must be 0,
+            # not null: Argo CD drops nulls from the stored Application spec,
+            # letting the chart default resurface.
+            hostPort: 0
             protocol: TCP
           prometheus:
             enabled: true
