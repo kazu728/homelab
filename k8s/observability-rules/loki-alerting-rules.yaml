@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: loki-alerting-rules
+  namespace: observability
+  labels:
+    loki_rule: "1"
+data:
+  host-logs.yaml: |
+    groups:
+      - name: host-log-pipeline
+        rules:
+          - alert: HostJournalLogsAbsent
+            expr: absent_over_time({service_name="systemd-journal"}[15m])
+            labels:
+              severity: critical
+              component: host-otelcol
+            annotations:
+              summary: Host journald logs are not reaching Loki
+              description: No systemd-journal stream has been ingested into Loki for 15 minutes. The host otelcol -> otel-collector -> Loki pipeline is broken.

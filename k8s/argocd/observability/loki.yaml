@@ -38,6 +38,17 @@ spec:
             retention_enabled: true
             delete_request_store: filesystem
             working_directory: /var/loki/compactor
+          rulerConfig:
+            storage:
+              type: local
+              local:
+                directory: /rules
+            # Scratch dir must differ from the read path (/rules); the ruler
+            # cleans rule_path on sync.
+            rule_path: /tmp/loki-rules-scratch
+            alertmanager_url: http://kube-prometheus-stack-alertmanager.observability.svc.cluster.local:9093
+            # Alertmanager 0.27+ dropped the v1 API
+            enable_alertmanager_v2: true
 
         singleBinary:
           replicas: 1
@@ -71,7 +82,8 @@ spec:
 
         sidecar:
           rules:
-            enabled: false
+            # Tenant dir: auth_enabled=false means the single tenant "fake"
+            folder: /rules/fake
 
         monitoring:
           serviceMonitor:

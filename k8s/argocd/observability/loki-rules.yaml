@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: loki-rules
+  namespace: argo-cd
+spec:
+  project: observability
+  source:
+    repoURL: https://github.com/kazu728/homelab.git
+    targetRevision: main
+    path: k8s/observability-rules
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: observability
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
