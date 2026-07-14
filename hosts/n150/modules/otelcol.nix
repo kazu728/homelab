@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 
 {
   users.groups.otelcol = {};
@@ -15,6 +15,9 @@
     wants = [ "network-online.target" ];
     wantedBy = [ "multi-user.target" ];
     path = [ pkgs.systemd ];
+    # Restart when the config changes so `nixos-rebuild switch` picks up edits;
+    # otherwise the running collector keeps its old in-memory config.
+    restartTriggers = [ config.environment.etc."otelcol/config.yaml".source ];
     serviceConfig = {
       User = "otelcol";
       Group = "otelcol";
