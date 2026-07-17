@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 
 {
   imports =
@@ -19,9 +19,34 @@
 
   networking.hostName = "nixos";
 
+  # Secrets are sops-encrypted to an age key derived from this host's SSH host
+  # key (.sops.yaml); a rebuilt node must restore that key to decrypt them.
+  sops.defaultSopsFile = ./secrets.yaml;
+  sops.age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+
   networking.networkmanager.enable = true;
   # Disable Wi-Fi power saving to reduce link drops.
   networking.networkmanager.wifi.powersave = false;
+  # Declare the Wi-Fi profile so a rebuilt node reconnects without console
+  # input. $WIFI_SSID/$WIFI_PSK are substituted from the sops env file.
+  networking.networkmanager.ensureProfiles = {
+    environmentFiles = [ config.sops.secrets."wifi-env".path ];
+    profiles.home-wifi = {
+      connection = {
+        id = "home-wifi";
+        type = "wifi";
+      };
+      wifi.ssid = "$WIFI_SSID";
+      wifi-security = {
+        key-mgmt = "wpa-psk";
+        psk = "$WIFI_PSK";
+      };
+    };
+  };
+  sops.secrets."wifi-env" = {
+    key = "wifi_env";
+    restartUnits = [ "NetworkManager-ensure-profiles.service" ];
+  };
 
   services.networkRecover.enable = true;
 

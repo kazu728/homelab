@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 
 {
   # 443/8443 fronted by `tailscale serve` (Grafana / Argo CD). The loopback
@@ -6,7 +6,19 @@
   # k8s/bootstrap/argocd-helmchart.yaml (32443).
   networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ 443 8443 ];
 
-  services.tailscale.enable = true;
+  services.tailscale = {
+    enable = true;
+    # Log in non-interactively when the node has no session (fresh rebuild).
+    # The secret is a Tailscale OAuth client secret (auth_keys scope) stored
+    # with "?ephemeral=false&preauthorized=true" appended: OAuth registration
+    # defaults to an ephemeral node, which the tailnet would delete after an
+    # outage. The client secret never expires and tagged nodes get node key
+    # expiry disabled, so no periodic browser re-auth. The tag must exist in
+    # terraform/tailscale's tagOwners.
+    authKeyFile = config.sops.secrets."tailscale-authkey".path;
+    extraUpFlags = [ "--advertise-tags=tag:homelab" ];
+  };
+  sops.secrets."tailscale-authkey".key = "tailscale_authkey";
   systemd.services.tailscale-serve-homelab = {
     description = "Tailscale HTTPS serve for homelab services";
     after = [ "network-online.target" "tailscaled.service" ];

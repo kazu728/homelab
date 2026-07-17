@@ -30,8 +30,6 @@ in
   # Make kubectl point to k3s kubeconfig by default.
   environment.sessionVariables.KUBECONFIG = "/etc/rancher/k3s/k3s.yaml";
 
-  sops.defaultSopsFile = ../secrets.yaml;
-  sops.age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
   sops.secrets."alertmanager-slack-webhook-url" = {
     key = "alertmanager_slack_webhook_url";
     owner = "root";
