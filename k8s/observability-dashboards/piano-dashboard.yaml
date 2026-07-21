@@ -90,7 +90,7 @@ data:
           "targets": [
             {
               "datasource": { "type": "prometheus", "uid": "${datasource}" },
-              "expr": "sum(increase(piano_notes_total[$__range]))",
+              "expr": "sum(increase(piano_keys_total[$__range]))",
               "refId": "A"
             }
           ],
@@ -233,7 +233,7 @@ data:
           "targets": [
             {
               "datasource": { "type": "prometheus", "uid": "${datasource}" },
-              "expr": "sum(rate(piano_notes_total[$__rate_interval]))",
+              "expr": "sum(rate(piano_keys_total[$__rate_interval]))",
               "legendFormat": "notes/s",
               "refId": "A"
             }
