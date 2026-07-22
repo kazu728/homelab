@@ -118,21 +118,6 @@ spec:
             memory: 32Mi
           limits:
             memory: 128Mi
-
-        prometheusRule:
-          enabled: true
-          additionalLabels:
-            release: kube-prometheus-stack
-          rules:
-            - alert: BlackboxProbeFailed
-              expr: probe_success == 0
-              for: 5m
-              labels:
-                severity: warning
-                component: blackbox-exporter
-              annotations:
-                summary: Blackbox probe failed
-                description: The {{ $labels.probe_type }} probe for {{ $labels.target }} has failed for at least 5 minutes.
   destination:
     server: https://kubernetes.default.svc
     namespace: observability

@@ -82,6 +82,12 @@ spec:
                 - receiver: 'null'
                   matchers:
                     - 'alertname = Watchdog'
+                # Operator list/watch failures are transient blips from Wi-Fi
+                # uplink flaps; the operator self-recovers, so there is nothing
+                # to act on. Keep the metrics, drop the page.
+                - receiver: 'null'
+                  matchers:
+                    - 'alertname =~ PrometheusOperatorListErrors|PrometheusOperatorWatchErrors'
             receivers:
               - name: 'null'
               - name: homelab-slack
