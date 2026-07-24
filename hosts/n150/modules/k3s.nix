@@ -57,6 +57,12 @@ in
   # Keep real files in k3s' watched manifests directory so bootstrap chart
   # changes are observed during `nixos-rebuild switch`.
   system.activationScripts.k3s-bootstrap-manifests.text = ''
+    # Run in a subshell so `set -euo pipefail` stays local to this snippet.
+    # NixOS concatenates every activation snippet into one shell (bashOptions =
+    # []; failures are recorded via trap ERR and execution continues); leaking
+    # these options would abort later snippets (sops-nix setup, the final
+    # /run/current-system swap) on the first non-zero exit meant to be logged.
+    (
     set -euo pipefail
 
     src=${k3sBootstrapManifestDir}
@@ -96,6 +102,7 @@ in
     fi
 
     ${pkgs.coreutils}/bin/mv -f -- "$next_state" "$state"
+    )
   '';
 
   systemd.services.homelab-kubernetes-secrets = {
