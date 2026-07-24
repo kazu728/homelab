@@ -10,8 +10,8 @@ build:
 
 access-list:
 	@host="$${HOMELAB_HOST:-$$(ssh $(N150_HOST) 'tailscale status --json' | python3 -c 'import json,sys; print(json.load(sys.stdin)["Self"]["DNSName"].rstrip("."))')}"; \
-	[ -n "$$host" ] || { echo "HOMELAB_ACCESS_HOST is empty" >&2; exit 1; }; \
-	case "$$host" in (*[!A-Za-z0-9._:-]*) echo "Invalid HOMELAB_ACCESS_HOST: $$host" >&2; exit 1;; esac; \
+	[ -n "$$host" ] || { echo "HOMELAB_HOST is empty" >&2; exit 1; }; \
+	case "$$host" in (*[!A-Za-z0-9._:-]*) echo "Invalid HOMELAB_HOST: $$host" >&2; exit 1;; esac; \
 	remote_cmd=$$(printf '%s\n' \
 		"sudo env KUBECONFIG=/etc/rancher/k3s/k3s.yaml HOMELAB_ACCESS_HOST=$$host sh <<'REMOTE_SCRIPT'" \
 		"set -eu" \
