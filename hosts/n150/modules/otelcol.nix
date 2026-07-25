@@ -25,7 +25,12 @@
       ExecStart = "${pkgs.opentelemetry-collector-contrib}/bin/otelcol-contrib --config /etc/otelcol/config.yaml";
       Restart = "on-failure";
       RestartSec = "5s";
-      MemoryMax = "256M";
+      # memory_limiter caps the heap at 200MiB and upstream notes the process
+      # total sits ~50MiB above that, so ~250MiB is the expected peak — and
+      # cgroup v2 also charges page cache, which here includes the bbolt mmap
+      # behind file_storage. Keep the cap clear of that instead of level with
+      # it; back-pressure is memory_limiter's job, this is only the backstop.
+      MemoryMax = "320M";
       StateDirectory = "otelcol";
       StateDirectoryMode = "0750";
     };
