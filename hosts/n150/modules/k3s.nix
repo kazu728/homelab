@@ -51,6 +51,10 @@ in
   services.k3s = {
     enable = true;
     role = "server";
+    # Pin the minor explicitly: the unversioned `k3s` alias would follow a
+    # flake.lock bump, and this nixpkgs already carries k3s_1_36. Keeping the
+    # OS and Kubernetes upgrades as separate events.
+    package = pkgs.k3s_1_35;
     extraFlags = "--write-kubeconfig-mode=640 --write-kubeconfig-group=k3s-admin --disable traefik --disable servicelb --kubelet-arg=max-pods=50 --kube-proxy-arg=nodeport-addresses=127.0.0.0/8 --resolv-conf=/etc/resolv.conf";
   };
 
@@ -168,10 +172,7 @@ in
         # via /proc every time the timer fires.
         kubectl -n observability exec -i "$grafana_pod" -c grafana \
           -- grafana cli admin reset-admin-password --password-from-stdin \
-          < "$grafana_admin_password_file" >/dev/null 2>&1 \
-          || kubectl -n observability exec -i "$grafana_pod" -c grafana \
-            -- grafana-cli admin reset-admin-password --password-from-stdin \
-            < "$grafana_admin_password_file" >/dev/null
+          < "$grafana_admin_password_file" >/dev/null
       else
         echo "Grafana pod is not ready; admin password reset will retry on the next timer run" >&2
       fi
