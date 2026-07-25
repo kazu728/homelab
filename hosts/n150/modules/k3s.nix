@@ -163,11 +163,15 @@ in
         grafana_pod=$(kubectl -n observability get pod \
           -l app.kubernetes.io/name=grafana,app.kubernetes.io/instance=grafana \
           -o jsonpath='{.items[0].metadata.name}')
-        grafana_password=$(cat "$grafana_admin_password_file")
-        kubectl -n observability exec "$grafana_pod" -c grafana \
-          -- grafana cli admin reset-admin-password "$grafana_password" >/dev/null 2>&1 \
-          || kubectl -n observability exec "$grafana_pod" -c grafana \
-            -- grafana-cli admin reset-admin-password "$grafana_password" >/dev/null
+        # Feed the password over stdin: as argv it would sit in the cmdline of
+        # both the host kubectl and the in-pod grafana process, world-readable
+        # via /proc every time the timer fires.
+        kubectl -n observability exec -i "$grafana_pod" -c grafana \
+          -- grafana cli admin reset-admin-password --password-from-stdin \
+          < "$grafana_admin_password_file" >/dev/null 2>&1 \
+          || kubectl -n observability exec -i "$grafana_pod" -c grafana \
+            -- grafana-cli admin reset-admin-password --password-from-stdin \
+            < "$grafana_admin_password_file" >/dev/null
       else
         echo "Grafana pod is not ready; admin password reset will retry on the next timer run" >&2
       fi
