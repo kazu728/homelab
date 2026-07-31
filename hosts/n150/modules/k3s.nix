@@ -1,6 +1,12 @@
 { config, lib, pkgs, ... }:
 
 let
+  # kubelet resolves the node IP once at startup, so a lease change on the
+  # unmanaged DHCP uplink leaves `default/kubernetes` DNATing 10.43.0.1 to a
+  # dead address and every pod loses the API server. 10.99/16 clears the pod
+  # (10.42/16) and service (10.43/16) CIDRs as well as the LAN's 100.64.0.0/22.
+  nodeIp = "10.99.0.1";
+
   k3sBootstrapManifestDir = ../../../k8s/bootstrap;
   k3sBootstrapManifestNames =
     builtins.attrNames (
@@ -18,6 +24,23 @@ in
   networking.firewall = {
     interfaces.tailscale0.allowedTCPPorts = [ 6443 ];
     trustedInterfaces = [ "cni0" "flannel.1" ];
+  };
+
+  # Loopback carries it: the address is only ever dialled from this host — by
+  # pods through cni0 and by the API server itself — and no link flap or lease
+  # renewal can take loopback away. Single node only: a second one would claim
+  # the same address and loop its own pods back at itself.
+  networking.interfaces.lo.ipv4.addresses = [
+    { address = nodeIp; prefixLength = 32; }
+  ];
+
+  # `deviceDependency` maps lo to an empty list, leaving the generated unit with
+  # neither wantedBy nor bindsTo, so nothing would start it. requiredBy rather
+  # than wantedBy: k3s without this address is the silent failure above, and
+  # Requires= turns it into a loud one.
+  systemd.services.network-addresses-lo = {
+    before = [ "k3s.service" ];
+    requiredBy = [ "k3s.service" ];
   };
 
   users.groups.k3s-admin = {};
@@ -55,6 +78,7 @@ in
     # flake.lock bump, and this nixpkgs already carries k3s_1_36. Keeping the
     # OS and Kubernetes upgrades as separate events.
     package = pkgs.k3s_1_35;
+    nodeIP = nodeIp;
     extraFlags = "--write-kubeconfig-mode=640 --write-kubeconfig-group=k3s-admin --disable traefik --disable servicelb --kubelet-arg=max-pods=50 --kube-proxy-arg=nodeport-addresses=127.0.0.0/8 --resolv-conf=/etc/resolv.conf";
   };
 
