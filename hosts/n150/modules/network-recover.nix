@@ -42,7 +42,6 @@ in
           exit 0
         fi
 
-        # A route lookup does not prove that the link is healthy.
         route_rc=0
         route="$(${pkgs.iproute2}/bin/ip route get 1.1.1.1 2>/dev/null \
           | ${pkgs.coreutils}/bin/head -n1)" || route_rc=$?

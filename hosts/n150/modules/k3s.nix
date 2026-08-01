@@ -17,10 +17,8 @@ let
   k3sBootstrapManifestArgs = lib.concatMapStringsSep " " lib.escapeShellArg k3sBootstrapManifestNames;
 in
 {
-  # IPv4 forwarding for flannel pod networking.
   boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
 
-  # Expose the k3s API and trust the pod networks over the firewall.
   networking.firewall = {
     interfaces.tailscale0.allowedTCPPorts = [ 6443 ];
     trustedInterfaces = [ "cni0" "flannel.1" ];
@@ -50,7 +48,6 @@ in
     kubernetes-helm
     k9s
   ];
-  # Make kubectl point to k3s kubeconfig by default.
   environment.sessionVariables.KUBECONFIG = "/etc/rancher/k3s/k3s.yaml";
 
   sops.secrets."alertmanager-slack-webhook-url" = {
@@ -69,8 +66,7 @@ in
     restartUnits = [ "homelab-kubernetes-secrets.service" ];
   };
 
-  # Lightweight single-node k3s. Bind NodePort to loopback only (nodeport-addresses):
-  # all consumers reach it via localhost, dropping its LAN exposure through FORWARD.
+  # NodePorts only serve local proxies, so keep them off LAN interfaces.
   services.k3s = {
     enable = true;
     role = "server";

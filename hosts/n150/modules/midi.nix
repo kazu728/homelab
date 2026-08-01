@@ -1,7 +1,6 @@
 { pkgs, midilab, ... }:
 
 {
-  # midilogd capture daemon (piano -> append-only JSONL under /var/lib/midilogd).
   imports = [ "${midilab}/nix/module.nix" ];
 
   # ALSA sequencer for capturing USB-MIDI from the piano.
@@ -14,7 +13,6 @@
     group = "midi-exporter";
   };
 
-  # Tail the capture log and push OTLP metrics to the in-cluster collector.
   # Runs on the host next to the data it reads — no hostPath, and the 0750
   # capture dir is reached by joining the midilogd group by name (no gid
   # pinning). TZ is inherited from the host, matching midilogd's date layout.
