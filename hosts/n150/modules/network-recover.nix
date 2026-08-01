@@ -9,7 +9,6 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    # Auto-recover Wi-Fi by reconnecting first, then restart NetworkManager if needed.
     systemd.services.network-recover = {
       description = "Recover Wi-Fi/NM when default route is missing";
       after = [ "NetworkManager.service" ];
@@ -27,29 +26,52 @@ in
       script = ''
         set -euo pipefail
 
-        wifi_dev="$(${pkgs.networkmanager}/bin/nmcli -t -f DEVICE,TYPE dev status \
+        nmcli_rc=0
+        dev_status="$(${pkgs.networkmanager}/bin/nmcli -t -f DEVICE,TYPE dev status 2>/dev/null)" || nmcli_rc=$?
+        if [ "$nmcli_rc" -ne 0 ]; then
+          echo "nmcli dev status failed (rc=$nmcli_rc)"
+          exit 0
+        fi
+
+        wifi_dev="$(printf '%s\n' "$dev_status" \
           | ${pkgs.gnugrep}/bin/grep ':wifi$' \
           | ${pkgs.coreutils}/bin/head -n1 \
           | ${pkgs.coreutils}/bin/cut -d: -f1 || true)"
         if [ -z "$wifi_dev" ]; then
+          echo "NetworkManager lists no wifi device"
           exit 0
         fi
 
-        # If there is a valid default route, nothing to do.
-        if ${pkgs.iproute2}/bin/ip route get 1.1.1.1 >/dev/null 2>&1; then
+        # A route lookup does not prove that the link is healthy.
+        route_rc=0
+        route="$(${pkgs.iproute2}/bin/ip route get 1.1.1.1 2>/dev/null \
+          | ${pkgs.coreutils}/bin/head -n1)" || route_rc=$?
+        if [ -n "$route" ]; then
+          echo "route lookup answered: $route"
           exit 0
         fi
 
-        # First try a Wi-Fi reconnect (minimal impact).
-        ${pkgs.networkmanager}/bin/nmcli dev disconnect "$wifi_dev" || true
+        echo "route lookup returned nothing (rc=$route_rc); reconnecting $wifi_dev"
+        disconnect_rc=0
+        ${pkgs.networkmanager}/bin/nmcli dev disconnect "$wifi_dev" || disconnect_rc=$?
         ${pkgs.coreutils}/bin/sleep 2
-        ${pkgs.networkmanager}/bin/nmcli dev connect "$wifi_dev" || true
+        connect_rc=0
+        ${pkgs.networkmanager}/bin/nmcli dev connect "$wifi_dev" || connect_rc=$?
         ${pkgs.coreutils}/bin/sleep 5
 
-        # If still no route, restart NetworkManager as a fallback.
-        if ! ${pkgs.iproute2}/bin/ip route get 1.1.1.1 >/dev/null 2>&1; then
-          ${pkgs.systemd}/bin/systemctl restart NetworkManager.service
+        route="$(${pkgs.iproute2}/bin/ip route get 1.1.1.1 2>/dev/null \
+          | ${pkgs.coreutils}/bin/head -n1 || true)"
+        if [ -n "$route" ]; then
+          echo "after reconnect (disconnect rc=$disconnect_rc, connect rc=$connect_rc) route lookup answered: $route"
+          exit 0
         fi
+
+        # Wi-Fi may not be reconnected when the restart command returns.
+        echo "after reconnect (disconnect rc=$disconnect_rc, connect rc=$connect_rc) route lookup returned nothing; restarting NetworkManager"
+        restart_rc=0
+        ${pkgs.systemd}/bin/systemctl restart NetworkManager.service || restart_rc=$?
+        echo "NetworkManager restart returned rc=$restart_rc"
+        exit "$restart_rc"
       '';
     };
 
