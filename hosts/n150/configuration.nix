@@ -9,6 +9,7 @@
       ./modules/otelcol.nix
       ./modules/tailscale.nix
       ./modules/midi.nix
+      ./modules/backup.nix
     ];
 
   boot.loader.systemd-boot.enable = true;
