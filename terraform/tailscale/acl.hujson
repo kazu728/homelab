@@ -17,7 +17,6 @@
 		},
 	],
 
-	// Test access rules every time they're saved.
 	"tests": [
 		{
 			"src": "kazuki.matsuo.728@gmail.com",
