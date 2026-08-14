@@ -93,7 +93,6 @@ spec:
               - name: homelab-slack
                 slack_configs:
                   - send_resolved: true
-                    # Secret key: homelab-alertmanager-webhook/url
                     api_url_file: /etc/alertmanager/secrets/homelab-alertmanager-webhook/url
             templates:
               - /etc/alertmanager/config/*.tmpl
