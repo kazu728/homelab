@@ -45,6 +45,47 @@ spec:
                       summary: Loki container is restarting
                       description: The loki container in observability/{{ $labels.pod }} restarted during the last 15 minutes.
 
+          homelab-backup:
+            groups:
+              - name: homelab-backup
+                rules:
+                  - alert: ResticBackupStale
+                    expr: time() - node_textfile_mtime_seconds{file="/host/textfile/restic-piano-capture.prom"} > 36 * 3600
+                    for: 10m
+                    labels:
+                      severity: critical
+                      component: backup
+                    annotations:
+                      summary: restic backup has not succeeded recently
+                      description: The piano capture backup last succeeded {{ $value | humanizeDuration }} ago.
+                  - alert: ResticBackupMetricsMissing
+                    expr: absent(node_textfile_mtime_seconds{file="/host/textfile/restic-piano-capture.prom"})
+                    for: 1h
+                    labels:
+                      severity: critical
+                      component: backup
+                    annotations:
+                      summary: restic backup metrics are missing
+                      description: No restic-piano-capture.prom is exposed by node-exporter, so backup health is unknown.
+                  - alert: ResticRepositoryLarge
+                    expr: restic_repository_size_bytes > 1e9
+                    for: 1h
+                    labels:
+                      severity: warning
+                      component: backup
+                    annotations:
+                      summary: restic repository is larger than expected
+                      description: The {{ $labels.backup }} repository holds {{ $value | humanize }}B.
+                  - alert: ResticRepositoryTooLarge
+                    expr: restic_repository_size_bytes > 5e9
+                    for: 1h
+                    labels:
+                      severity: critical
+                      component: backup
+                    annotations:
+                      summary: restic repository is approaching the R2 free tier
+                      description: The {{ $labels.backup }} repository holds {{ $value | humanize }}B against a 10GB free tier.
+
         alertmanager:
           config:
             global:
@@ -120,6 +161,14 @@ spec:
 
         prometheus-node-exporter:
           hostNetwork: false
+          extraArgs:
+            - --collector.textfile.directory=/host/textfile
+          extraHostVolumeMounts:
+            - name: textfile
+              hostPath: /var/lib/node-exporter/textfile
+              type: DirectoryOrCreate
+              mountPath: /host/textfile
+              readOnly: true
           resources:
             requests:
               cpu: 20m
