@@ -5,8 +5,8 @@ RSYNC_FLAGS := -av --no-perms --no-owner --no-group --omit-dir-times
 build:
 	stage=$$(ssh $(N150_HOST) 'mktemp -d') && \
 	trap 'ssh $(N150_HOST) "rm -rf $$stage"' EXIT && \
-	rsync $(RSYNC_FLAGS) -z --relative --exclude .git -e "ssh" ./flake.nix ./flake.lock ./.sops.yaml ./hosts ./k8s/bootstrap $(N150_HOST):$$stage/ && \
-	ssh -t $(N150_HOST) "sudo mkdir -p /etc/nixos/hosts /etc/nixos/k8s/bootstrap && sudo rm -f /etc/nixos/configuration.nix && sudo rsync $(RSYNC_FLAGS) $$stage/flake.nix $$stage/flake.lock $$stage/.sops.yaml /etc/nixos/ && sudo rsync $(RSYNC_FLAGS) --delete $$stage/hosts/ /etc/nixos/hosts/ && sudo rsync $(RSYNC_FLAGS) --delete $$stage/k8s/bootstrap/ /etc/nixos/k8s/bootstrap/ && cd /etc/nixos && sudo nixos-rebuild switch --flake /etc/nixos#nixos --option extra-experimental-features 'nix-command flakes'"
+	rsync $(RSYNC_FLAGS) -z --relative --exclude .git -e "ssh" ./flake.nix ./flake.lock ./hosts ./k8s/bootstrap $(N150_HOST):$$stage/ && \
+	ssh -t $(N150_HOST) "sudo mkdir -p /etc/nixos/hosts /etc/nixos/k8s/bootstrap && sudo rm -f /etc/nixos/configuration.nix && sudo rsync $(RSYNC_FLAGS) $$stage/flake.nix $$stage/flake.lock /etc/nixos/ && sudo rsync $(RSYNC_FLAGS) --delete $$stage/hosts/ /etc/nixos/hosts/ && sudo rsync $(RSYNC_FLAGS) --delete $$stage/k8s/bootstrap/ /etc/nixos/k8s/bootstrap/ && sudo nixos-rebuild switch --flake /etc/nixos#nixos"
 
 access-list:
 	@host="$${HOMELAB_HOST:-$$(ssh $(N150_HOST) 'tailscale status --json' | python3 -c 'import json,sys; print(json.load(sys.stdin)["Self"]["DNSName"].rstrip("."))')}"; \
