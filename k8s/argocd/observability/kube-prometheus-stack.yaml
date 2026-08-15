@@ -12,15 +12,6 @@ spec:
     helm:
       skipCrds: true
       valuesObject:
-        defaultRules:
-          create: true
-          rules:
-            etcd: false
-            kubeControllerManager: false
-            kubeProxy: false
-            kubeSchedulerAlerting: false
-            kubeSchedulerRecording: false
-
         additionalPrometheusRulesMap:
           homelab-observability:
             groups:
@@ -189,9 +180,6 @@ spec:
             retention: 30d
             retentionSize: 8GiB
             serviceMonitorSelectorNilUsesHelmValues: false
-            ruleSelector:
-              matchLabels:
-                release: kube-prometheus-stack
             externalLabels:
               cluster: n150
             resources:
