@@ -90,20 +90,10 @@ in
 
     ${pkgs.coreutils}/bin/install -d -m 0755 "$dst"
 
-    for link in "$dst"/*.yaml; do
-      [ -L "$link" ] || continue
-      target=$(${pkgs.coreutils}/bin/readlink "$link")
-      case "$target" in
-        /etc/nixos/k8s/bootstrap/*)
-          ${pkgs.coreutils}/bin/rm -f -- "$link"
-          ;;
-      esac
-    done
-
     : > "$next_state"
     for name in ${k3sBootstrapManifestArgs}; do
       ${pkgs.coreutils}/bin/printf '%s\n' "$name" >> "$next_state"
-      if [ -L "$dst/$name" ] || ! ${pkgs.diffutils}/bin/cmp -s "$src/$name" "$dst/$name"; then
+      if ! ${pkgs.diffutils}/bin/cmp -s "$src/$name" "$dst/$name"; then
         tmp="$dst/.$name.tmp"
         ${pkgs.coreutils}/bin/install -m 0644 "$src/$name" "$tmp"
         ${pkgs.coreutils}/bin/mv -f -- "$tmp" "$dst/$name"
