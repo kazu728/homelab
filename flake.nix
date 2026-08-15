@@ -64,9 +64,9 @@
         system:
         let
           pkgs = pkgsFor system;
-          inherit (pkgs) mkShell;
-
-          homelabShell = mkShell {
+        in
+        {
+          default = pkgs.mkShell {
             packages = with pkgs; [
               terraform
               terraform-ls
@@ -75,10 +75,6 @@
               actionlint
             ];
           };
-        in
-        {
-          default = homelabShell;
-          homelab = homelabShell;
         }
       );
 
