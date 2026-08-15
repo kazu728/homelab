@@ -27,4 +27,3 @@ jobs:
         with:
           advanced-security: false
           annotations: true
-          fail-on-no-inputs: false
