@@ -51,7 +51,6 @@
   services.networkRecover.enable = true;
 
   time.timeZone = "Asia/Tokyo";
-  i18n.defaultLocale = "en_US.UTF-8";
 
   # Reachable over tailscale only; each service module opens its own ports.
   networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ 22 ];
@@ -59,7 +58,6 @@
   # Use compressed RAM swap to soften OOMs without disk swap.
   zramSwap = {
     enable = true;
-    memoryPercent = 50;
     priority = 100;
   };
 
@@ -67,12 +65,7 @@
     HandleSuspendKey = "ignore";
     HandleHibernateKey = "ignore";
     HandleLidSwitch = "ignore";
-    IdleAction = "ignore";
   };
-
-  services.journald.extraConfig = ''
-  Storage=persistent
-  '';
 
   services.openssh = {
     enable = true;
@@ -95,8 +88,6 @@
   security.sudo.wheelNeedsPassword = false;
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
-
-  nixpkgs.config.allowUnfree = true;
 
   environment.systemPackages = with pkgs; [
     neovim

@@ -52,17 +52,11 @@ in
 
   sops.secrets."alertmanager-slack-webhook-url" = {
     key = "alertmanager_slack_webhook_url";
-    owner = "root";
-    group = "root";
-    mode = "0400";
     restartUnits = [ "homelab-kubernetes-secrets.service" ];
   };
   sops.secrets."grafana-admin-password" = {
     sopsFile = ../grafana-secrets.yaml;
     key = "grafana_admin_password";
-    owner = "root";
-    group = "root";
-    mode = "0400";
     restartUnits = [ "homelab-kubernetes-secrets.service" ];
   };
 
@@ -204,7 +198,6 @@ in
     timerConfig = {
       OnBootSec = "2min";
       OnUnitActiveSec = "10min";
-      Unit = "homelab-kubernetes-secrets.service";
     };
   };
 }
