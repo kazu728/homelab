@@ -27,9 +27,7 @@ processors:
 
 exporters:
   otlphttp:
-    # Pinned ClusterIP of the in-cluster otel-collector Service (reached via
-    # kube-proxy DNAT); must match service.clusterIP in
-    # k8s/argocd/observability/otel-collector.yaml.
+    # Must match the pinned ClusterIP in the otel-collector Service manifest.
     endpoint: http://10.43.0.100:4318
 
 service:

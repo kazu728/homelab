@@ -1,10 +1,7 @@
 { config, lib, pkgs, ... }:
 
 let
-  # kubelet resolves the node IP once at startup, so a lease change on the
-  # unmanaged DHCP uplink leaves `default/kubernetes` DNATing 10.43.0.1 to a
-  # dead address and every pod loses the API server. 10.99/16 clears the pod
-  # (10.42/16) and service (10.43/16) CIDRs as well as the LAN's 100.64.0.0/22.
+  # Keep the node IP outside k3s and LAN CIDRs to avoid DHCP-related API failures.
   nodeIp = "10.99.0.1";
 
   k3sBootstrapManifestDir = ../../../k8s/bootstrap;
@@ -24,18 +21,12 @@ in
     trustedInterfaces = [ "cni0" "flannel.1" ];
   };
 
-  # Loopback carries it: the address is only ever dialled from this host — by
-  # pods through cni0 and by the API server itself — and no link flap or lease
-  # renewal can take loopback away. Single node only: a second one would claim
-  # the same address and loop its own pods back at itself.
+  # Single-node address on loopback; a second node needs another IP.
   networking.interfaces.lo.ipv4.addresses = [
     { address = nodeIp; prefixLength = 32; }
   ];
 
-  # `deviceDependency` maps lo to an empty list, leaving the generated unit with
-  # neither wantedBy nor bindsTo, so nothing would start it. requiredBy rather
-  # than wantedBy: k3s without this address is the silent failure above, and
-  # Requires= turns it into a loud one.
+  # Make k3s require the loopback address unit; deviceDependency does not start it.
   systemd.services.network-addresses-lo = {
     before = [ "k3s.service" ];
     requiredBy = [ "k3s.service" ];
@@ -64,22 +55,15 @@ in
   services.k3s = {
     enable = true;
     role = "server";
-    # Pin the minor explicitly: the unversioned `k3s` alias would follow a
-    # flake.lock bump, and this nixpkgs already carries k3s_1_36. Keeping the
-    # OS and Kubernetes upgrades as separate events.
+    # Pin Kubernetes minor upgrades separately from the OS.
     package = pkgs.k3s_1_35;
     nodeIP = nodeIp;
     extraFlags = "--write-kubeconfig-mode=640 --write-kubeconfig-group=k3s-admin --disable traefik --disable servicelb --kubelet-arg=max-pods=50 --kube-proxy-arg=nodeport-addresses=127.0.0.0/8 --resolv-conf=/etc/resolv.conf";
   };
 
-  # Keep real files in k3s' watched manifests directory so bootstrap chart
-  # changes are observed during `nixos-rebuild switch`.
+  # k3s watches this directory for bootstrap manifest changes.
   system.activationScripts.k3s-bootstrap-manifests.text = ''
-    # Run in a subshell so `set -euo pipefail` stays local to this snippet.
-    # NixOS concatenates every activation snippet into one shell (bashOptions =
-    # []; failures are recorded via trap ERR and execution continues); leaking
-    # these options would abort later snippets (sops-nix setup, the final
-    # /run/current-system swap) on the first non-zero exit meant to be logged.
+    # Keep strict shell options local to this activation snippet.
     (
     set -euo pipefail
 
@@ -171,12 +155,14 @@ in
         grafana_pod=$(kubectl -n observability get pod \
           -l app.kubernetes.io/name=grafana,app.kubernetes.io/instance=grafana \
           -o jsonpath='{.items[0].metadata.name}')
-        # Feed the password over stdin: as argv it would sit in the cmdline of
-        # both the host kubectl and the in-pod grafana process, world-readable
-        # via /proc every time the timer fires.
-        kubectl -n observability exec -i "$grafana_pod" -c grafana \
+        # Grafana only seeds this password during DB initialization; reset it on each sync.
+        # Pass it via stdin so it does not appear in process arguments.
+        if ! reset_output=$(kubectl -n observability exec -i "$grafana_pod" -c grafana \
           -- grafana cli admin reset-admin-password --password-from-stdin \
-          < "$grafana_admin_password_file" >/dev/null
+          < "$grafana_admin_password_file" 2>&1); then
+          printf '%s\n' "$reset_output" >&2
+          exit 1
+        fi
       else
         echo "Grafana pod is not ready; admin password reset will retry on the next timer run" >&2
       fi

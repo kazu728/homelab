@@ -8,8 +8,6 @@ in
   sops.secrets."restic-password" = {
     key = "restic_password";
   };
-  # Also carries RESTIC_REPOSITORY, which keeps the Cloudflare account ID out of
-  # this public repository.
   sops.secrets."restic-r2-env" = {
     key = "restic_r2_env";
   };
@@ -21,8 +19,7 @@ in
     passwordFile = config.sops.secrets."restic-password".path;
     environmentFile = config.sops.secrets."restic-r2-env".path;
     initialize = true;
-    # The capture log is append-only, so the newest snapshot already holds every
-    # day; older snapshots only guard against an accidental deletion.
+    # Append-only logs make the newest snapshot complete; older ones cover deletion.
     pruneOpts = [
       "--keep-daily 7"
       "--keep-weekly 4"
@@ -51,8 +48,7 @@ in
     '';
   };
 
-  # Persistent=true makes the daily timer fire at boot, which can land before
-  # the Wi-Fi uplink is up.
+  # Persistent timers may run before Wi-Fi; order the backup after network-online.
   systemd.services.restic-backups-piano-capture = {
     after = [ "network-online.target" ];
     wants = [ "network-online.target" ];

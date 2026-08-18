@@ -27,8 +27,7 @@
   networking.networkmanager.enable = true;
   # Disable Wi-Fi power saving to reduce link drops.
   networking.networkmanager.wifi.powersave = false;
-  # Declare the Wi-Fi profile so a rebuilt node reconnects without console
-  # input. $WIFI_SSID/$WIFI_PSK are substituted from the sops env file.
+  # Keep the Wi-Fi profile available after rebuilds.
   networking.networkmanager.ensureProfiles = {
     environmentFiles = [ config.sops.secrets."wifi-env".path ];
     profiles.home-wifi = {
@@ -55,7 +54,6 @@
   # Reachable over tailscale only; each service module opens its own ports.
   networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ 22 ];
 
-  # Use compressed RAM swap to soften OOMs without disk swap.
   zramSwap = {
     enable = true;
     priority = 100;
